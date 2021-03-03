@@ -76,12 +76,22 @@ au FileType python let b:delimitMate_nesting_quotes = ['"']
 "==========Clang-format==========
 
 Bundle 'rhysd/vim-clang-format'
+let g:clang_format#code_style = "google"
 let g:clang_format#style_options = {
-            \ "AccessModifierOffset" : -4,
-            \ "AllowShortIfStatementsOnASingleLine" : "true",
-            \ "AlwaysBreakTemplateDeclarations" : "true",
+			\ "Language" : "Cpp",
             \ "Standard" : "C++11",
-            \ "BreakBeforeBraces" : "Stroustrup"}
+			\ "IndentWidth" : 4,
+            \ "AccessModifierOffset" : -2,
+			\ "AllowShortLoopsOnASingleLine" : "false",
+            \ "AllowShortIfStatementsOnASingleLine" : "false",
+			\ "AllowShortCaseLabelsOnASingleLine" :	"false",
+			\ "AllowShortFunctionsOnASingleLine" : "Empty",
+			\ "BinPackArguments" : "true",
+			\ "BinPackParameters" : "true",
+			\ "ColumnLimit" : 80,
+			\ "MaxEmptyLinesToKeep" : 1,
+			\ "TabWidth" : 4,
+			\ "UseTab" : "Never"}
 " map to <Leader>ff in C++ code
 autocmd FileType c,cpp,objc nnoremap <buffer><Leader>ff :<C-u>ClangFormat<CR>
 autocmd FileType c,cpp,objc vnoremap <buffer><Leader>ff :ClangFormat<CR>
@@ -187,4 +197,4 @@ let g:solarized_termtrans=1
 let g:solarized_contrast="normal"
 let g:solarized_visibility="normal"
 
-"END -2021.03.02
+"END -2021.03.03
