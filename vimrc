@@ -101,6 +101,8 @@ set number
 
 "Highlight the grammar
 syntax on
+noremap <F12> <Esc>:syntax sync fromstart<CR>
+inoremap <F12> <C-o>:syntax sync fromstart<CR>
 
 "Set the highlight tips
 "hightlight the content in search
