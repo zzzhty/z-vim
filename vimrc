@@ -1,6 +1,6 @@
 "====================
 " Author: ZhangTianyi
-" Version: 1.0
+" Version: 1.1
 " Email: tyz1024@gmail.com
 " Sections:
 "	-> InitialPlugins
@@ -11,6 +11,7 @@
 "	-> Theme Settings
 "	-> HotKey Settings
 "	-> Others
+
 
 "====================
 " Initial Plugins
@@ -29,34 +30,35 @@ endif
 " ensure ftdetect et al work by including this after the Vundle stuff
 filetype plugin indent on
 
+
 "====================
 " General Settings
 "====================
 
-"Set backspace
+" Set backspace
 set backspace=indent,eol,start
 set whichwrap+=<,>,h,l
 
-"history storage
+" history storage
 set history=2000
 
-"detect the file type
+" detect the file type
 filetype on
-"adapt diffrent Format for different file type
+" adapt diffrent Format for different file type
 filetype indent on
-"Plugins allowed
+" Plugins allowed
 filetype plugin on
-"autocomplete on
+" autocomplete on
 filetype plugin indent on
 
 set autoread	"autoread the file if modificated
 
-"Cancel the backup
+" Cancel the backup
 set nobackup
-"Close the swapfile
+" Close the swapfile
 set noswapfile
 
-"create undo file
+" create undo file
 if has('persistent_undo')
 	set undolevels=1000		"How many undos
 	set undoreload=10000	"number of lines to save for undo
@@ -66,66 +68,67 @@ endif
 
 set wildignore=*.swp,*.bak,*.pyc,*.class,.svn
 
-"prominent the column
+" prominent the column
 set cursorcolumn
 
-"prominent the line
+" prominent the line
 set cursorline
 
-"remain the content after quite
+" remain the content after quite
 set t_ti= t_te=
 
-"remember info about open buffers on close
+" remember info about open buffers on close
 set viminfo^=%
 
-"For regular expressiongs turn magic on
+" For regular expressiongs turn magic on
 set magic
 
-"Enabled to paste more than 50 lines
+" Enabled to paste more than 50 lines
 set viminfo='1000,<1000
 
 
 "====================
 " Display Settings
 "====================
-"Display basic
+
+" Display basic
 set ruler
 set showmode
 set showcmd
 
-"scroll lines
+" scroll lines
 set scrolloff=7
 
-"display the line-number
+" display the line-number
 set number
 
-"Highlight the grammar
+" Highlight the grammar
 syntax on
 noremap <F12> <Esc>:syntax sync fromstart<CR>
 inoremap <F12> <C-o>:syntax sync fromstart<CR>
 
-"Set the highlight tips
-"hightlight the content in search
+" Set the highlight tips
+" hightlight the content in search
 set hlsearch
-"ignore the capslock
+" ignore the capslock
 set ignorecase
-"Smartcase
+" Smartcase
 set smartcase
 
-"Set TAB
+" Set TAB
 set tabstop=4
 set shiftwidth=4
 set softtabstop=4
 
-"Indent
+" Indent
 set smartindent	"Smart indent
 set autoindent	"auto indent
 
-"Relative Line Number
+" Relative Line Number
 set relativenumber number
 au FocusLost * :set norelativenumber number
 au FocusGained * :set relativenumber
-"Use Absolute Line Number while typing
+" Use Absolute Line Number while typing
 autocmd InsertEnter * :set norelativenumber number
 autocmd InsertLeave * :set relativenumber
 function! NumberToggle()
@@ -146,31 +149,30 @@ inoremap {<CR> {}<ESC>i<CR><ESC>O
 " FileEncode Settings
 "====================
 
-"set new file in UTF-8
+" set new file in UTF-8
 set encoding=utf-8
-"自动判断编码时，依次尝试以下编码：
+" 自动判断编码时，依次尝试以下编码：
 set fileencodings=ucs-bom,utf-8,cp936,gb18030,big5,euc-jp,euc-kr,latin1
 set helplang=cn
-"set langmenu=zh_CN.UTF-8
-"set enc=2byte-gb18030
-"下面这句只影响普通模式 (非图形界面) 下的 Vim。
+" 下面这句只影响非图形界面 下的 Vim。
 set termencoding=utf-8
 
-"Use Unix as the standard file type
+" Use Unix as the standard file type
 set ffs=unix,dos,mac
 
-"如遇Unicode值大于255的文本，不必等到空格再折行。
+" 如遇Unicode值大于255的文本，不必等到空格再折行。
 set formatoptions+=m
-"合并两行中文时，不在中间加空格：
+" 合并两行中文时，不在中间加空格：
 set formatoptions+=B
+
 
 "====================
 " Filetype Settings
 "====================
+
 " Python 文件的一般设置，比如不要 tab 等
 autocmd FileType python set tabstop=4 shiftwidth=4 expandtab ai
 
-" 保存python文件时删除多余空格
 " Delete trailing white space on save, useful for Python and CoffeeScript ;)
 func! DeleteTrailingWS()
   exe "normal mz"
@@ -236,12 +238,12 @@ colorscheme solarized
 set background=dark
 set t_Co=256
 
-"设置标记一列的背景颜色和数字一行颜色一致
+" 设置标记一列的背景颜色和数字一行颜色一致
 hi! link SignColumn   LineNr
 hi! link ShowMarksHLl DiffAdd
 hi! link ShowMarksHLu DiffChange
 
-"" for error highlight，防止错误整行标红导致看不清
+" for error highlight，防止错误整行标红导致看不清
 highlight clear SpellBad
 highlight SpellBad term=standout ctermfg=1 term=underline cterm=underline
 highlight clear SpellCap
@@ -251,67 +253,70 @@ highlight SpellRare term=underline cterm=underline
 highlight clear SpellLocal
 highlight SpellLocal term=underline cterm=underline
 
+
 "====================
 " HotKey Settings
 "====================
-"快速进入命令行
+
+" 快速进入命令行
 nnoremap ; :
 
-"命令行模式加强
+" 命令行模式加强
 cnoremap <C-j> <t_kd>
 cnoremap <C-k> <t_ku>
 cnoremap <C-a> <Home>
 cnoremap <C-e> <End>
 
-" 搜索相关
-"Use sane regexes
+" Use sane regexes
 nnoremap / /\v
 vnoremap / /\v
 
-"Keep search pattern at the center of the screen
+" Keep search pattern at the center of the screen
 nnoremap <silent> n nzz
 nnoremap <silent> N Nzz
 nnoremap <silent> * *zz
 nnoremap <silent> # #zz
 nnoremap <silent> g* g*zz
 
-"去掉搜索高亮
+" 去掉搜索高亮
 noremap <silent><leader>/ :nohls<CR>
 
-"选择全部
+" 选择全部
 nnoremap <leader>sa ggVG"
-"选择块
+" 选择块
 nnoremap <leader>v V'}
 
 
 "====================
 " Others
 "====================
+
 autocmd! bufwritepost _vimrc source % "vimrc文件修改之后自动加载(windows)
 autocmd! bufwritepost .vimrc source % "vimrc文件修改之后自动加载(linux)
 
-"auto-complete configuration
+" auto-complete configuration
 set completeopt=longest,menu
 
-"增强模式中的命令行自动完成操作
+" 增强模式中的命令行自动完成操作
 set wildmenu
-"Ignore compiled files
+" Ignore compiled files
 set wildignore=*.o,*~,*.pyc,*.class
 
-"离开插入模式后自动关闭预览窗口
+" 离开插入模式后自动关闭预览窗口
 autocmd InsertLeave * if pumvisible() == 0|pclose|endif
-""回车即选中当前项
+" 回车即选中当前项
 inoremap <expr> <CR>       pumvisible() ? "\<C-y>" : "\<CR>"
 
-"上下左右键的行为 会显示其他信息
+" 上下左右键的行为 会显示其他信息
 inoremap <expr> <Down>     pumvisible() ? "\<C-n>" : "\<Down>"
 inoremap <expr> <Up>       pumvisible() ? "\<C-p>" : "\<Up>"
 inoremap <expr> <PageDown> pumvisible() ? "\<PageDown>\<C-p>\<C-n>" : "\<PageDown>"
 inoremap <expr> <PageUp>   pumvisible() ? "\<PageUp>\<C-p>\<C-n>" : "\<PageUp>"
 
-"if this not work ,make sure .viminfo is writable for you
+" if this not work ,make sure .viminfo is writable for you
 if has("autocmd")
 	au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 endif
+
 
 "End-of-Config

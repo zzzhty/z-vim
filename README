@@ -1,14 +1,9 @@
 基础配置：
 
-1.ctags(optional)
-> ubuntu
-sudo apt-get install ctags
+1.Python Format
+sudo apt install autopep8
 
-2.Python
-sudo apt install flake8
-sudo apt install pep8
-
-3.CPP
+2.CPP Format
 sudo apt install clang-format
 
 Note: YCM requires additional compilation.

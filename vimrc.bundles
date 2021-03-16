@@ -2,6 +2,7 @@
 " Vundle插件管理及配置列表
 " =======================
 
+
 "==========初始化==========
 
 set nocompatible              " be iMproved, required
@@ -23,6 +24,7 @@ filetype plugin indent on	" required
 "
 " see :h vundle for more details or wiki for FAQ
 
+
 "==========基础==========
 
 " 多语言语法检查
@@ -36,23 +38,22 @@ let g:syntastic_javascript_checkers = ['jsl', 'jshint']
 let g:syntastic_html_checkers=['tidy', 'jshint']
 highlight SyntasticErrorSign guifg=white guibg=black
 
+
 "==========自动补全==========
 
 " YouCompleteMe(optional)
-"重启 :YcmRestartServer
+" 重启 :YcmRestartServer
 Bundle 'Valloric/YouCompleteMe'
-"youcompleteme  默认tab  s-tab 和自动补全冲突
-"let g:ycm_key_list_select_completion=['<c-n>']
+" let g:ycm_key_list_select_completion=['<c-n>']
 let g:ycm_key_list_select_completion = ['<Down>']
-"let g:ycm_key_list_previous_completion=['<c-p>']
+" let g:ycm_key_list_previous_completion=['<c-p>']
 let g:ycm_key_list_previous_completion = ['<Up>']
 let g:ycm_complete_in_comments = 1  "在注释输入中也能补全
 let g:ycm_complete_in_strings = 1   "在字符串输入中也能补全
 let g:ycm_use_ultisnips_completer = 1 "提示UltiSnips
 let g:ycm_collect_identifiers_from_comments_and_strings = 1   "注释和字符串中的文字也会被收入补全
 let g:ycm_collect_identifiers_from_tags_files = 1
-
-let g:ycm_seed_identifiers_with_syntax=1   "语言关键字补全, 不过python关键字都很短，所以，需要的自己打开
+let g:ycm_seed_identifiers_with_syntax=1   "语言关键字补全
 
 " 跳转到定义处, 分屏打开
 let g:ycm_goto_buffer_command = 'horizontal-split'
@@ -70,11 +71,13 @@ let g:ycm_filetype_blacklist = {
 
 " 自动补全单引号，双引号等
 Bundle 'Raimondi/delimitMate'
-"" for python docstring ",优化输入
+" for python docstring
 au FileType python let b:delimitMate_nesting_quotes = ['"']
 
-"==========Clang-format==========
 
+"==========Language-format==========
+
+" Clang-format
 Bundle 'rhysd/vim-clang-format'
 let g:clang_format#code_style = "google"
 let g:clang_format#style_options = {
@@ -98,6 +101,12 @@ autocmd FileType c,cpp,objc vnoremap <buffer><Leader>ff :ClangFormat<CR>
 autocmd FileType c,cpp,objc ClangFormatAutoEnable
 autocmd FileType c,cpp,objc autocmd BufWrite *: Autoformat
 
+" Pep8-format
+Bundle 'tell-k/vim-autopep8'
+let g:autopep8_on_save = 1
+let g:autopep8_disable_show_diff = 1
+
+
 "==========快速编码==========
 
 " 快速注释: [count]<leader>cc | [count]<leader>cu
@@ -113,31 +122,19 @@ vmap <Leader>a= :Tabularize /=<CR>
 nmap <Leader>a: :Tabularize /:<CR>
 vmap <Leader>a: :Tabularize /:<CR>
 
-"==========快速移动==========
-
-"更高效的移动 [,, + w/fx]
-Bundle 'Lokaltog/vim-easymotion'
-Bundle 'vim-scripts/matchit.zip'
-
-"==========文本对象==========
-
-" 支持自定义文本对象
-Bundle 'kana/vim-textobj-user.git'
-" 增加行文本对象:
-Bundle 'kana/vim-textobj-line'
-" 增加文件文本对象:
-Bundle 'kana/vim-textobj-entire.git'
-" 增加缩进文本对象:
-Bundle 'kana/vim-textobj-indent.git'
 
 "==========功能相关==========
+
+" 更高效的移动 [,, + w/fx]
+Bundle 'Lokaltog/vim-easymotion'
+Bundle 'vim-scripts/matchit.zip'
 
 " 文件搜索
 Bundle 'kien/ctrlp.vim'
 let g:ctrlp_map = '<leader>p'
 let g:ctrlp_cmd = 'CtrlP'
 map <leader>f :CtrlPMRU<CR>
-"set wildignore+=*/tmp/*,*.so,*.swp,*.zip     " MacOSX/Linux"
+" set wildignore+=*/tmp/*,*.so,*.swp,*.zip     " MacOSX/Linux"
 let g:ctrlp_custom_ignore = {
     \ 'dir':  '\v[\/]\.(git|hg|svn|rvm)$',
     \ 'file': '\v\.(exe|so|dll|zip|tar|tar.gz)$',
@@ -159,9 +156,10 @@ let g:ctrlp_funky_syntax_highlight = 1
 
 let g:ctrlp_extensions = ['funky']
 
+
 "==========显示增强==========
 
-"括号显示增强
+" 括号显示增强
 Bundle 'kien/rainbow_parentheses.vim'
 let g:rbpt_colorpairs = [
     \ ['brown',       'RoyalBlue3'],
@@ -188,13 +186,14 @@ au Syntax * RainbowParenthesesLoadRound
 au Syntax * RainbowParenthesesLoadSquare
 au Syntax * RainbowParenthesesLoadBraces
 
+
 "==========显示增强-主题==========
 
-"主题 solarized
+" 主题 solarized
 Bundle 'altercation/vim-colors-solarized'
-"let g:solarized_termcolors=256	#开启则使用系统自带颜色
 let g:solarized_termtrans=1
 let g:solarized_contrast="normal"
 let g:solarized_visibility="normal"
 
-"END -2021.03.03
+
+"END -2021.03.16
