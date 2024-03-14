@@ -86,6 +86,14 @@ set noshowmode
 " add indent dash-lines
 Plugin 'Yggdroot/indentLine'
 
+" python formatting plugin
+Plugin 'psf/black'
+let g:black_use_virtualenv = 0
+augroup black_on_save
+    autocmd!
+    autocmd BufWritePre *.py Black
+augroup end
+
 " All of your Plugins must be added before the following line
 call vundle#end()               " required
 " 启动与当前文件类型相关的插件以及自动缩进
