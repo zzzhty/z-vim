@@ -1,0 +1,117 @@
+"====================
+" Author: ZhangTianyi
+" Version: 0.1
+" Email: tyz1024@gmail.com
+" Description:
+"   A simplified vim configure file for MS-DOS system.
+"   Powershell7 and Windows Terminal are recommended.
+"   '_vimrc' file and 'vimfiles' folder are required.
+
+
+" 基础配置
+set shellslash      " 路径使用左斜杠
+set number          " 显示行号
+set ruler           " 显示标尺
+set autoread        " 打开文件监视
+set showcmd         " 显示正在输入指令
+set wildmenu        " 命令模式智能补全
+set showmatch       " 自动高亮另一边括号
+set hlsearch        " 高亮显示搜索结果
+set ignorecase      " 搜索时忽略大小写
+
+" 高亮配色
+if !has('gui_running')
+    set t_Co=256    " 开启256色
+endif
+set cursorline      " 显示光标标线
+set cursorcolumn
+highlight CursorLine cterm=NONE ctermfg=NONE ctermbg=darkgray
+highlight CursorColumn cterm=NONE ctermfg=NONE ctermbg=darkgray
+highlight CursorLineNr cterm=NONE ctermfg=lightgreen ctermbg=NONE
+" 突出显示超出第80列的所有内容及行末空格
+highlight OverLength cterm=NONE ctermfg=white ctermbg=darkred
+match OverLength /\%>80v.\+\|\s\+$/
+
+" 文本格式
+syntax enable       " 语义分析
+set autoindent      " 回车后自动缩进
+set nowrap          " 关闭自动折行
+set expandtab       " 自动将Tab转换为空格
+set ww=<,>,h,l      " 允许光标跨越边界
+set tabstop=4       " 制表符空格数
+set softtabstop=4   " Tab转换的空格数
+set shiftwidth=4    " normal模式下缩进空格数
+set backspace=2     " 可以删除任何值
+set textwidth=1000  " 设置最大行宽
+set scrolloff=5     " 自动翻页最小距离
+
+" 历史记录
+set nobackup        " 取消备份文件
+set noswapfile      " 取消交换文件
+set history=1000    " 最大历史记录
+" 打开文件回到之前位置（依据.viminfo）
+if has('autocmd')
+    autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$")
+                \ | exe "normal! g'\""
+                \ | exe "normal! g`\""
+                \ | exe "normal! zz" | endif
+endif
+
+" 文件编码
+set encoding=utf-8
+set termencoding=utf-8
+set fileencoding=utf-8
+set fileencodings=ucs-bom,utf-8,cp936,gb18030,big5,euc-jp,euc-kr,latin1
+
+" 自定义命令
+let mapleader=','                           " 定义快捷键的前缀<Leader>
+noremap ; :
+nnoremap <Leader>/ :noh<CR>                 " 取消高亮
+inoremap <C-s> <Esc>:w<CR>                  " 保存文件
+noremap <C-s> :w<CR>
+noremap <Leader><Space> :%s/\s\+$//g<CR>    " 删除行末空格
+
+" 插件管理
+filetype off        " required
+" set the runtime path to include Vundle and initialize
+set rtp+=~/vimfiles/bundle/Vundle.vim
+call vundle#begin('~/vimfiles/bundle')
+" let Vundle manage Vundle, required
+Plugin 'VundleVim/Vundle.vim'
+
+" plugin on GitHub repo
+Plugin 'tpope/vim-fugitive'
+
+" a nice statusline plugin
+Plugin 'itchyny/lightline.vim'
+set laststatus=2
+let g:lightline = {
+            \ 'colorscheme': 'wombat',
+            \ }
+set noshowmode
+
+" add indent dash-lines
+Plugin 'Yggdroot/indentLine'
+
+" python formatting plugin
+Plugin 'psf/black'
+let g:black_use_virtualenv = 0
+augroup black_on_save
+    autocmd!
+    autocmd BufWritePre *.py Black
+augroup end
+
+" All of your Plugins must be added before the following line
+call vundle#end()               " required
+" 启动与当前文件类型相关的插件以及自动缩进
+filetype plugin indent on       " required
+" To ignore plugin indent changes, instead use:
+"filetype plugin on
+"
+" Brief help
+" :PluginList       - lists configured plugins
+" :PluginInstall    - installs plugins; append `!` to update or just :PluginUpdate
+" :PluginSearch foo - searches for foo; append `!` to refresh local cache
+" :PluginClean      - confirms removal of unused plugins; append `!` to auto-approve removal
+"
+" see :h vundle for more details or wiki for FAQ
