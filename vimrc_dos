@@ -6,6 +6,7 @@
 "   A simplified vim configure file for MS-DOS system.
 "   Powershell7 and Windows Terminal are recommended.
 "   '_vimrc' file and 'vimfiles' folder are required.
+"   Notice: ensure 'set ff=dos' in vim command mode.
 
 
 " 基础配置
@@ -30,7 +31,7 @@ highlight CursorColumn cterm=NONE ctermfg=NONE ctermbg=darkgray
 highlight CursorLineNr cterm=NONE ctermfg=lightgreen ctermbg=NONE
 " 突出显示超出第80列的所有内容及行末空格
 highlight OverLength cterm=NONE ctermfg=white ctermbg=darkred
-match OverLength /\%>80v.\+\|\s\+$/
+au BufRead,BufNewFile *.py match OverLength /\%>80v.\+\|\s\+$/
 
 " 文本格式
 syntax enable       " 语义分析
@@ -70,6 +71,10 @@ nnoremap <Leader>/ :noh<CR>                 " 取消高亮
 inoremap <C-s> <Esc>:w<CR>                  " 保存文件
 noremap <C-s> :w<CR>
 noremap <Leader><Space> :%s/\s\+$//g<CR>    " 删除行末空格
+" 支持在Visual模式下，通过C-y复制到系统剪切板
+vnoremap <C-y> "+y
+" 支持在normal模式下，通过C-p粘贴系统剪切板
+nnoremap <C-p> "*p
 
 " 插件管理
 filetype off        " required
