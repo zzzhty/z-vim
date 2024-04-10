@@ -8,7 +8,11 @@ set nocompatible              " be iMproved, required
 filetype off                  " required
 
 " set the runtime path to include Vundle and initialize
-set rtp+=~/.vim/bundle/Vundle.vim
+if g:islinux
+    set rtp+=~/.vim/bundle/Vundle.vim
+else
+    set rtp+=~/vimfiles/bundle/Vundle.vim
+endif
 call vundle#begin()
 " alternatively, pass a path where Vundle should install plugins
 "call vundle#begin('~/some/path/here')
@@ -33,47 +37,25 @@ let g:syntastic_check_on_wq = 0
 
 "==========Language-format==========
 
-" Clang-format
-Plugin 'rhysd/vim-clang-format'
-let g:clang_format#code_style = "google"
-let g:clang_format#style_options = {
-			\ "Language" : "Cpp",
-            \ "Standard" : "C++11",
-			\ "IndentWidth" : 4,
-            \ "AccessModifierOffset" : -2,
-			\ "AllowShortLoopsOnASingleLine" : "false",
-            \ "AllowShortIfStatementsOnASingleLine" : "false",
-			\ "AllowShortCaseLabelsOnASingleLine" :	"false",
-			\ "AllowShortFunctionsOnASingleLine" : "Empty",
-			\ "BinPackArguments" : "true",
-			\ "BinPackParameters" : "true",
-			\ "ColumnLimit" : 80,
-			\ "MaxEmptyLinesToKeep" : 1,
-			\ "TabWidth" : 4,
-			\ "UseTab" : "Never"}
-" map to <Leader>ff in C++ code
-autocmd FileType c,cpp,objc nnoremap <buffer><Leader>ff :<C-u>ClangFormat<CR>
-autocmd FileType c,cpp,objc vnoremap <buffer><Leader>ff :ClangFormat<CR>
-autocmd FileType c,cpp,objc ClangFormatAutoEnable
-autocmd FileType c,cpp,objc autocmd BufWrite *: Autoformat
-
 " Python-format
 Plugin 'psf/black'
 " Editor integration:
 " https://black.readthedocs.io/en/stable/integrations/editors.html
-let g:black_virtualenv = '~/.vim/black'
+if g:islinux
+    let g:black_virtualenv = '~/.vim/black'
+else
+    let g:black_virtualenv = '~/vimfiles/black'
+endif
 augroup black_on_save
-    autocmd!
+	autocmd!
     autocmd BufWritePre *.py Black
 augroup end
+
 
 "==========快速编码==========
 
 " 快速注释: [count]<leader>cc | [count]<leader>cu
 Plugin 'preservim/nerdcommenter'
-" 快速去行尾空格 [, + <Space>]
-Plugin 'bronson/vim-trailing-whitespace'
-map <leader><space> :FixWhitespace<cr>
 " 快速赋值语句对齐
 Plugin 'godlygeek/tabular'
 nmap <Leader>a= :Tabularize /=<CR>
@@ -95,10 +77,9 @@ let g:ctrlp_cmd = 'CtrlP'
 map <leader>f :CtrlPMRU<CR>
 " set wildignore+=*/tmp/*,*.so,*.swp,*.zip     " MacOSX/Linux"
 let g:ctrlp_custom_ignore = {
-    \ 'dir':  '\v[\/]\.(git|hg|svn|rvm)$',
-    \ 'file': '\v\.(exe|so|dll|zip|tar|tar.gz)$',
-    \ }
-"\ 'link': 'SOME_BAD_SYMBOLIC_LINKS',
+			\ 'dir':  '\v[\/]\.(git|hg|svn|rvm)$',
+			\ 'file': '\v\.(exe|so|dll|zip|tar|tar.gz)$',
+			\ }
 let g:ctrlp_working_path_mode=0
 let g:ctrlp_match_window_bottom=1
 let g:ctrlp_max_height=15
@@ -112,10 +93,9 @@ nnoremap <Leader>fu :CtrlPFunky<Cr>
 " narrow the list down with a word under cursor
 nnoremap <Leader>fU :execute 'CtrlPFunky ' . expand('<cword>')<Cr>
 let g:ctrlp_funky_syntax_highlight = 1
-
 let g:ctrlp_extensions = ['funky']
 
-" plugin on GitHub repo
+" A Git wrapper so awesome, it should be illegal
 Plugin 'tpope/vim-fugitive'
 
 

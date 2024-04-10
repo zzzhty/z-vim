@@ -29,6 +29,7 @@ set cursorcolumn
 highlight CursorLine cterm=NONE ctermfg=NONE ctermbg=darkgray
 highlight CursorColumn cterm=NONE ctermfg=NONE ctermbg=darkgray
 highlight CursorLineNr cterm=NONE ctermfg=lightgreen ctermbg=NONE
+
 " 突出显示超出第80列的所有内容及行末空格
 highlight OverLength cterm=NONE ctermfg=white ctermbg=darkred
 au BufRead,BufNewFile *.py match OverLength /\%>80v.\+\|\s\+$/
@@ -66,11 +67,20 @@ set fileencodings=ucs-bom,utf-8,cp936,gb18030,big5,euc-jp,euc-kr,latin1
 
 " 自定义命令
 let mapleader=','                           " 定义快捷键的前缀<Leader>
-noremap ; :
+nnoremap ; :
 nnoremap <silent><Leader>/ :nohls<CR>       " 取消搜索高亮
 inoremap <C-s> <Esc>:w<CR>                  " 保存文件
-noremap <C-s> :w<CR>
-noremap <Leader><Space> :%s/\s\+$//g<CR>    " 删除行末空格
+nnoremap <C-s> :w<CR>
+
+" 文件保存时删除句尾空格
+function! DeleteTrailingWS() abort
+	normal mz
+	%s/\s\+$//ge
+	normal `z
+endfunc
+autocmd BufWrite * :call DeleteTrailingWS()
+nnoremap <Leader><Space> :call DeleteTrailingWS()
+
 " 支持在Visual模式下，通过C-y复制到系统剪切板
 vnoremap <C-y> "+y
 " 支持在normal模式下，通过C-p粘贴系统剪切板
@@ -98,7 +108,7 @@ set noshowmode
 " add indent dash-lines
 Plugin 'Yggdroot/indentLine'
 
-" python formatting plugin
+" Python formatting plugin
 Plugin 'psf/black'
 " Editor integration:
 " https://black.readthedocs.io/en/stable/integrations/editors.html 

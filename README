@@ -1,9 +1,1 @@
-基础配置：
-
-1.Python Format
-sudo apt install autopep8
-
-2.CPP Format
-sudo apt install clang-format
-
-Note: YCM requires additional compilation.
+New version!!!
