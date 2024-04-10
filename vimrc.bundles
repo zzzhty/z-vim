@@ -139,6 +139,7 @@ set noshowmode
 
 " 增加缩进虚线
 Plugin 'Yggdroot/indentLine'
+let g:indentLine_fileType = ['c', 'cpp', 'python']
 
 
 "==========完成配置==========
