@@ -1,6 +1,6 @@
 "====================
 " Author: ZhangTianyi
-" Version: 1.1
+" Version: 1.2
 " Email: tyz1024@gmail.com
 " Sections:
 "	-> InitialPlugins
@@ -8,7 +8,6 @@
 "	-> Display Settings
 "	-> FileEncode Settings
 "	-> Filetype Settings
-"	-> Theme Settings
 "	-> HotKey Settings
 "	-> Others
 
@@ -27,7 +26,7 @@ if filereadable(expand("~/.vimrc.bundles"))
 	source ~/.vimrc.bundles
 endif
 
-" ensure ftdetect et al work by including this after the Vundle stuff
+" Ensure ftdetect et al. take effect after Vundle
 filetype plugin indent on
 
 
@@ -46,16 +45,17 @@ set history=2000
 filetype on
 " adapt diffrent Format for different file type
 filetype indent on
-" Plugins allowed
+" plugins allowed
 filetype plugin on
 " autocomplete on
 filetype plugin indent on
 
-set autoread	"autoread the file if modificated
+" autoread the file if modificated
+set autoread
 
-" Cancel the backup
+" disable the backup
 set nobackup
-" Close the swapfile
+" close the swapfile
 set noswapfile
 
 " create undo file
@@ -68,13 +68,7 @@ endif
 
 set wildignore=*.swp,*.bak,*.pyc,*.class,.svn
 
-" prominent the column
-set cursorcolumn
-
-" prominent the line
-set cursorline
-
-" remain the content after quite
+" remain the content after quit
 set t_ti= t_te=
 
 " remember info about open buffers on close
@@ -85,6 +79,11 @@ set magic
 
 " Enabled to paste more than 50 lines
 set viminfo='1000,<1000
+
+" 支持在Visual模式下，通过C-y复制到系统剪切板
+vnoremap <C-y> "+y
+" 支持在normal模式下，通过C-p粘贴系统剪切板
+nnoremap <C-p> "*p
 
 
 "====================
@@ -144,6 +143,52 @@ nnoremap <C-n> :call NumberToggle()<cr>
 inoremap {<CR> {}<ESC>i<CR><ESC>O
 " { 加回车，自动换行；{ 加空格，则为补全大括号
 
+" Set extra options when running in GUI mode
+if has("gui_running")
+    set guifont=Monaco:h14
+    if has("gui_gtk2")   "GTK2
+        set guifont=Monaco\ 12, Monospace\ 12
+    endif
+    set guioptions-=T
+    set guioptions+=e
+    set guioptions-=r
+    set guioptions-=L
+    set guitablabel=%M\ %t
+    set showtabline=1
+    set linespace=2
+    set noimd
+endif
+
+" 主题设置
+" colorscheme solarized
+" set background=dark
+
+" 高亮配色
+set t_Co=256	" 开启256色
+set cursorline	" 显示光标标线
+set cursorcolumn
+highlight CursorLine cterm=NONE ctermfg=NONE ctermbg=darkgray
+highlight CursorColumn cterm=NONE ctermfg=NONE ctermbg=darkgray
+highlight CursorLineNr cterm=NONE ctermfg=lightgreen ctermbg=NONE
+" 突出显示超出第80列的所有内容及行末空格
+highlight OverLength cterm=NONE ctermfg=white ctermbg=darkred
+au BufRead,BufNewFile *.py match OverLength /\%>80v.\+\|\s\+$/
+
+" 设置标记一列的背景颜色和数字一行颜色一致
+hi! link SignColumn   LineNr
+hi! link ShowMarksHLl DiffAdd
+hi! link ShowMarksHLu DiffChange
+
+" for error highlight，防止错误整行标红导致看不清
+highlight clear SpellBad
+highlight SpellBad term=standout ctermfg=1 term=underline cterm=underline
+highlight clear SpellCap
+highlight SpellCap term=underline cterm=underline
+highlight clear SpellRare
+highlight SpellRare term=underline cterm=underline
+highlight clear SpellLocal
+highlight SpellLocal term=underline cterm=underline
+
 
 "====================
 " FileEncode Settings
@@ -151,10 +196,11 @@ inoremap {<CR> {}<ESC>i<CR><ESC>O
 
 " set new file in UTF-8
 set encoding=utf-8
+set fileencoding=utf-8
 " 自动判断编码时，依次尝试以下编码：
 set fileencodings=ucs-bom,utf-8,cp936,gb18030,big5,euc-jp,euc-kr,latin1
 set helplang=cn
-" 下面这句只影响非图形界面 下的 Vim。
+" 下面这句只影响非图形界面下的Vim
 set termencoding=utf-8
 
 " Use Unix as the standard file type
@@ -210,48 +256,6 @@ endfunc
 
 " F10 to run python script
 nnoremap <buffer> <F10> :exec '!python' shellescape(@%, 1)<cr>
-
-
-"====================
-" Theme Settings
-"====================
-
-" Set extra options when running in GUI mode
-if has("gui_running")
-    set guifont=Monaco:h14
-    if has("gui_gtk2")   "GTK2
-        set guifont=Monaco\ 12, Monospace\ 12
-    endif
-    set guioptions-=T
-    set guioptions+=e
-    set guioptions-=r
-    set guioptions-=L
-    set guitablabel=%M\ %t
-    set showtabline=1
-    set linespace=2
-    set noimd
-    set t_Co=256
-endif
-
-" theme主题
-colorscheme solarized
-set background=dark
-set t_Co=256
-
-" 设置标记一列的背景颜色和数字一行颜色一致
-hi! link SignColumn   LineNr
-hi! link ShowMarksHLl DiffAdd
-hi! link ShowMarksHLu DiffChange
-
-" for error highlight，防止错误整行标红导致看不清
-highlight clear SpellBad
-highlight SpellBad term=standout ctermfg=1 term=underline cterm=underline
-highlight clear SpellCap
-highlight SpellCap term=underline cterm=underline
-highlight clear SpellRare
-highlight SpellRare term=underline cterm=underline
-highlight clear SpellLocal
-highlight SpellLocal term=underline cterm=underline
 
 
 "====================
@@ -313,7 +317,8 @@ inoremap <expr> <Up>       pumvisible() ? "\<C-p>" : "\<Up>"
 inoremap <expr> <PageDown> pumvisible() ? "\<PageDown>\<C-p>\<C-n>" : "\<PageDown>"
 inoremap <expr> <PageUp>   pumvisible() ? "\<PageUp>\<C-p>\<C-n>" : "\<PageUp>"
 
-" if this not work ,make sure .viminfo is writable for you
+" 打开文件回到之前位置
+" if this not work, make sure .viminfo is writable for you
 if has("autocmd")
 	au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 endif

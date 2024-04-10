@@ -11,24 +11,16 @@ filetype off                  " required
 " set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
+" alternatively, pass a path where Vundle should install plugins
+"call vundle#begin('~/some/path/here')
+
 " let Vundle manage Vundle, required
-Plugin 'gmarik/Vundle.vim'
-call vundle#end()
-filetype plugin indent on	" required
-
-" Brief help
-" :PluginList       - lists configured plugins
-" :PluginInstall    - installs plugins; append `!` to update or just :PluginUpdate
-" :PluginSearch foo - searches for foo; append `!` to refresh local cache
-" :PluginClean      - confirms removal of unused plugins; append `!` to auto-approve removal
-"
-" see :h vundle for more details or wiki for FAQ
-
+Plugin 'VundleVim/Vundle.vim'
 
 "==========基础==========
 
 " 多语言语法检查
-Bundle 'scrooloose/syntastic'
+Plugin 'scrooloose/syntastic'
 let g:syntastic_error_symbol='>>'
 let g:syntastic_warning_symbol='>'
 let g:syntastic_check_on_open=1
@@ -41,36 +33,8 @@ highlight SyntasticErrorSign guifg=white guibg=black
 
 "==========自动补全==========
 
-" YouCompleteMe(optional)
-" 重启 :YcmRestartServer
-" Bundle 'Valloric/YouCompleteMe'
-" let g:ycm_key_list_select_completion=['<c-n>']
-let g:ycm_key_list_select_completion = ['<Down>']
-" let g:ycm_key_list_previous_completion=['<c-p>']
-let g:ycm_key_list_previous_completion = ['<Up>']
-let g:ycm_complete_in_comments = 1  "在注释输入中也能补全
-let g:ycm_complete_in_strings = 1   "在字符串输入中也能补全
-let g:ycm_use_ultisnips_completer = 1 "提示UltiSnips
-let g:ycm_collect_identifiers_from_comments_and_strings = 1   "注释和字符串中的文字也会被收入补全
-let g:ycm_collect_identifiers_from_tags_files = 1
-let g:ycm_seed_identifiers_with_syntax=1   "语言关键字补全
-
-" 跳转到定义处, 分屏打开
-let g:ycm_goto_buffer_command = 'horizontal-split'
-" nnoremap <leader>jd :YcmCompleter GoToDefinition<CR>
-nnoremap <leader>jd :YcmCompleter GoToDefinitionElseDeclaration<CR>
-nnoremap <leader>gd :YcmCompleter GoToDeclaration<CR>
-
-" 直接触发自动补全 insert模式下
-" let g:ycm_key_invoke_completion = '<C-Space>'
-" 黑名单,不启用ycm
-let g:ycm_filetype_blacklist = {
-      \ 'tagbar' : 1,
-      \ 'gitcommit' : 1,
-      \}
-
 " 自动补全单引号，双引号等
-Bundle 'Raimondi/delimitMate'
+Plugin 'Raimondi/delimitMate'
 " for python docstring
 au FileType python let b:delimitMate_nesting_quotes = ['"']
 
@@ -78,7 +42,7 @@ au FileType python let b:delimitMate_nesting_quotes = ['"']
 "==========Language-format==========
 
 " Clang-format
-Bundle 'rhysd/vim-clang-format'
+Plugin 'rhysd/vim-clang-format'
 let g:clang_format#code_style = "google"
 let g:clang_format#style_options = {
 			\ "Language" : "Cpp",
@@ -101,21 +65,25 @@ autocmd FileType c,cpp,objc vnoremap <buffer><Leader>ff :ClangFormat<CR>
 autocmd FileType c,cpp,objc ClangFormatAutoEnable
 autocmd FileType c,cpp,objc autocmd BufWrite *: Autoformat
 
-" Pep8-format
-Bundle 'tell-k/vim-autopep8'
-let g:autopep8_on_save = 1
-let g:autopep8_disable_show_diff = 1
-
+" python formatting plugin
+Plugin 'psf/black'
+" Editor integration:
+" https://black.readthedocs.io/en/stable/integrations/editors.html
+let g:black_virtualenv = '~/.vim/black'
+augroup black_on_save
+    autocmd!
+    autocmd BufWritePre *.py Black
+augroup end
 
 "==========快速编码==========
 
 " 快速注释: [count]<leader>cc | [count]<leader>cu
-Bundle 'scrooloose/nerdcommenter'
+Plugin 'scrooloose/nerdcommenter'
 " 快速去行尾空格 [, + <Space>]
-Bundle 'bronson/vim-trailing-whitespace'
+Plugin 'bronson/vim-trailing-whitespace'
 map <leader><space> :FixWhitespace<cr>
 " 快速赋值语句对齐
-Bundle 'godlygeek/tabular'
+Plugin 'godlygeek/tabular'
 nmap <Leader>a= :Tabularize /=<CR>
 vmap <Leader>a= :Tabularize /=<CR>
 " :号也对齐
@@ -126,11 +94,11 @@ vmap <Leader>a: :Tabularize /:<CR>
 "==========功能相关==========
 
 " 更高效的移动 [,, + w/fx]
-Bundle 'Lokaltog/vim-easymotion'
-Bundle 'vim-scripts/matchit.zip'
+Plugin 'Lokaltog/vim-easymotion'
+Plugin 'vim-scripts/matchit.zip'
 
 " 文件搜索
-Bundle 'kien/ctrlp.vim'
+Plugin 'kien/ctrlp.vim'
 let g:ctrlp_map = '<leader>p'
 let g:ctrlp_cmd = 'CtrlP'
 map <leader>f :CtrlPMRU<CR>
@@ -148,7 +116,7 @@ let g:ctrlp_mruf_max=500
 let g:ctrlp_follow_symlinks=1
 
 " ctrlp插件 - 不用ctag进行函数快速跳转
-Bundle 'tacahiroy/ctrlp-funky'
+Plugin 'tacahiroy/ctrlp-funky'
 nnoremap <Leader>fu :CtrlPFunky<Cr>
 " narrow the list down with a word under cursor
 nnoremap <Leader>fU :execute 'CtrlPFunky ' . expand('<cword>')<Cr>
@@ -156,11 +124,14 @@ let g:ctrlp_funky_syntax_highlight = 1
 
 let g:ctrlp_extensions = ['funky']
 
+" plugin on GitHub repo
+Plugin 'tpope/vim-fugitive'
+
 
 "==========显示增强==========
 
 " 括号显示增强
-Bundle 'kien/rainbow_parentheses.vim'
+Plugin 'kien/rainbow_parentheses.vim'
 let g:rbpt_colorpairs = [
     \ ['brown',       'RoyalBlue3'],
     \ ['Darkblue',    'SeaGreen3'],
@@ -186,14 +157,34 @@ au Syntax * RainbowParenthesesLoadRound
 au Syntax * RainbowParenthesesLoadSquare
 au Syntax * RainbowParenthesesLoadBraces
 
+" 状态栏插件
+Plugin 'itchyny/lightline.vim'
+set laststatus=2
+let g:lightline = {
+            \ 'colorscheme': 'wombat',
+            \ }
+set noshowmode
 
-"==========显示增强-主题==========
-
-" 主题 solarized
-Bundle 'altercation/vim-colors-solarized'
-let g:solarized_termtrans=1
-let g:solarized_contrast="normal"
-let g:solarized_visibility="normal"
+" 增加缩进虚线
+Plugin 'Yggdroot/indentLine'
 
 
-"END -2021.03.16
+"==========完成配置==========
+
+" All of your Plugins must be added before the following line
+call vundle#end()           " required
+filetype plugin indent on	" required
+" To ignore plugin indent changes, instead use:
+"filetype plugin on
+"
+" Brief help
+" :PluginList       - lists configured plugins
+" :PluginInstall    - installs plugins; append `!` to update or just :PluginUpdate
+" :PluginSearch foo - searches for foo; append `!` to refresh local cache
+" :PluginClean      - confirms removal of unused plugins; append `!` to auto-approve removal
+"
+" see :h vundle for more details or wiki for FAQ
+" Put your non-Plugin stuff after this line
+
+
+"END -2024.04.10
