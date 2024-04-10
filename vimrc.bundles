@@ -2,7 +2,6 @@
 " Vundle插件管理及配置列表
 " =======================
 
-
 "==========初始化==========
 
 set nocompatible              " be iMproved, required
@@ -17,26 +16,19 @@ call vundle#begin()
 " let Vundle manage Vundle, required
 Plugin 'VundleVim/Vundle.vim'
 
+
 "==========基础==========
 
 " 多语言语法检查
-Plugin 'scrooloose/syntastic'
-let g:syntastic_error_symbol='>>'
-let g:syntastic_warning_symbol='>'
-let g:syntastic_check_on_open=1
-let g:syntastic_enable_highlighting = 0
-let g:syntastic_python_checkers=['pyflakes']
-let g:syntastic_javascript_checkers = ['jsl', 'jshint']
-let g:syntastic_html_checkers=['tidy', 'jshint']
-highlight SyntasticErrorSign guifg=white guibg=black
+Plugin 'vim-syntastic/syntastic'
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
 
-
-"==========自动补全==========
-
-" 自动补全单引号，双引号等
-Plugin 'Raimondi/delimitMate'
-" for python docstring
-au FileType python let b:delimitMate_nesting_quotes = ['"']
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
 
 
 "==========Language-format==========
@@ -65,7 +57,7 @@ autocmd FileType c,cpp,objc vnoremap <buffer><Leader>ff :ClangFormat<CR>
 autocmd FileType c,cpp,objc ClangFormatAutoEnable
 autocmd FileType c,cpp,objc autocmd BufWrite *: Autoformat
 
-" python formatting plugin
+" Python-format
 Plugin 'psf/black'
 " Editor integration:
 " https://black.readthedocs.io/en/stable/integrations/editors.html
@@ -78,7 +70,7 @@ augroup end
 "==========快速编码==========
 
 " 快速注释: [count]<leader>cc | [count]<leader>cu
-Plugin 'scrooloose/nerdcommenter'
+Plugin 'preservim/nerdcommenter'
 " 快速去行尾空格 [, + <Space>]
 Plugin 'bronson/vim-trailing-whitespace'
 map <leader><space> :FixWhitespace<cr>
@@ -94,11 +86,10 @@ vmap <Leader>a: :Tabularize /:<CR>
 "==========功能相关==========
 
 " 更高效的移动 [,, + w/fx]
-Plugin 'Lokaltog/vim-easymotion'
-Plugin 'vim-scripts/matchit.zip'
+Plugin 'easymotion/vim-easymotion'
 
 " 文件搜索
-Plugin 'kien/ctrlp.vim'
+Plugin 'ctrlpvim/ctrlp.vim'
 let g:ctrlp_map = '<leader>p'
 let g:ctrlp_cmd = 'CtrlP'
 map <leader>f :CtrlPMRU<CR>
