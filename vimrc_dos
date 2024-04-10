@@ -77,7 +77,7 @@ vnoremap <C-y> "+y
 nnoremap <C-p> "*p
 
 " 插件管理
-filetype off        " required
+filetype off            " required
 " set the runtime path to include Vundle and initialize
 set rtp+=~/vimfiles/bundle/Vundle.vim
 call vundle#begin('~/vimfiles/bundle')
