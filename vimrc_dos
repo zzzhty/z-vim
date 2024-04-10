@@ -67,7 +67,7 @@ set fileencodings=ucs-bom,utf-8,cp936,gb18030,big5,euc-jp,euc-kr,latin1
 " 自定义命令
 let mapleader=','                           " 定义快捷键的前缀<Leader>
 noremap ; :
-nnoremap <Leader>/ :noh<CR>                 " 取消高亮
+nnoremap <silent><Leader>/ :nohls<CR>       " 取消搜索高亮
 inoremap <C-s> <Esc>:w<CR>                  " 保存文件
 noremap <C-s> :w<CR>
 noremap <Leader><Space> :%s/\s\+$//g<CR>    " 删除行末空格
