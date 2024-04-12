@@ -3,7 +3,7 @@
 " Version: 1.2
 " Email: tyz1024@gmail.com
 " Sections:
-"	-> InitialPlugins
+"	-> Initial Plugins
 "	-> General Settings
 "	-> Display Settings
 "	-> FileEncode Settings
@@ -11,11 +11,9 @@
 "	-> HotKey Settings
 "	-> Others
 
-
 "====================
 " Initial Plugins
 "====================
-
 " 判断当前操作系统
 let g:iswindows = 0
 let g:islinux = 0
@@ -44,11 +42,9 @@ endif
 " 文件类型检测
 filetype plugin indent on
 
-
 "====================
 " General Settings
 "====================
-
 " 允许退格键删除任意内容
 set backspace=indent,eol,start
 " 允许光标跨越边界
@@ -91,11 +87,9 @@ vnoremap <C-y> "+y
 " 支持在normal模式下，通过C-p粘贴系统剪切板
 nnoremap <C-p> "*p
 
-
 "====================
 " Display Settings
 "====================
-
 " 基础设置
 syntax enable	" 语法高亮
 set number		" 显示行号
@@ -173,11 +167,9 @@ if has("gui_running")
     set noimd
 endif
 
-
 "====================
 " FileEncode Settings
 "====================
-
 " 文件编码
 set encoding=utf-8
 set fileencoding=utf-8
@@ -200,11 +192,9 @@ set formatoptions+=m
 " 合并两行中文时，不在中间加空格：
 set formatoptions+=B
 
-
 "====================
 " Filetype Settings
 "====================
-
 " 突出显示超出第80列的所有内容及行末空格
 highlight OverLength cterm=NONE ctermfg=white ctermbg=darkred
 au BufRead,BufNewFile *.py match OverLength /\%>80v.\+\|\s\+$/
@@ -218,11 +208,9 @@ endfunc
 autocmd BufWrite * :call DeleteTrailingWS()
 nnoremap <Leader><Space> :call DeleteTrailingWS()
 
-
 "====================
 " HotKey Settings
 "====================
-
 " 快速进入命令行
 nnoremap ; :
 
@@ -254,11 +242,9 @@ noremap <silent> <leader>/ :nohls<CR>
 " 大括号自动补全
 inoremap {<CR> {}<ESC>i<CR><ESC>O
 
-
 "====================
 " Others
 "====================
-
 autocmd! bufwritepost _vimrc source % "vimrc文件修改之后自动加载(windows)
 autocmd! bufwritepost .vimrc source % "vimrc文件修改之后自动加载(linux)
 

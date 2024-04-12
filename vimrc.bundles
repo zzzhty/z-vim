@@ -3,7 +3,6 @@
 " =======================
 
 "==========初始化==========
-
 set nocompatible              " be iMproved, required
 filetype off                  " required
 
@@ -21,9 +20,7 @@ endif
 " let Vundle manage Vundle, required
 Plugin 'VundleVim/Vundle.vim'
 
-
 "==========基础==========
-
 " 多语言语法检查
 Plugin 'vim-syntastic/syntastic'
 set statusline+=%#warningmsg#
@@ -35,9 +32,7 @@ let g:syntastic_auto_loc_list = 1
 let g:syntastic_check_on_open = 1
 let g:syntastic_check_on_wq = 0
 
-
 "==========Language-format==========
-
 " Python-format
 Plugin 'psf/black'
 " Editor integration:
@@ -52,9 +47,7 @@ augroup black_on_save
     autocmd BufWritePre *.py Black
 augroup end
 
-
 "==========快速编码==========
-
 " 快速注释: [count]<leader>cc | [count]<leader>cu
 Plugin 'preservim/nerdcommenter'
 " 快速赋值语句对齐
@@ -65,9 +58,7 @@ vmap <Leader>a= :Tabularize /=<CR>
 nmap <Leader>a: :Tabularize /:<CR>
 vmap <Leader>a: :Tabularize /:<CR>
 
-
 "==========功能相关==========
-
 " 更高效的移动 [,, + w/fx]
 Plugin 'easymotion/vim-easymotion'
 
@@ -99,9 +90,7 @@ let g:ctrlp_extensions = ['funky']
 " A Git wrapper so awesome, it should be illegal
 Plugin 'tpope/vim-fugitive'
 
-
 "==========显示增强==========
-
 " 括号显示增强
 Plugin 'kien/rainbow_parentheses.vim'
 let g:rbpt_colorpairs = [
@@ -141,9 +130,7 @@ set noshowmode
 Plugin 'Yggdroot/indentLine'
 let g:indentLine_fileType = ['c', 'cpp', 'python']
 
-
 "==========完成配置==========
-
 " All of your Plugins must be added before the following line
 call vundle#end()           " required
 filetype plugin indent on	" required
