@@ -28,6 +28,8 @@ let g:syntastic_auto_loc_list = 1
 let g:syntastic_check_on_open = 1
 let g:syntastic_check_on_wq = 0
 let g:syntastic_python_checkers = ['flake8']
+" Select alternative linters:
+":help syntastic-checkers-python
 
 "==========Language-format==========
 " Python-format
@@ -47,16 +49,15 @@ augroup end
 "==========快速编码==========
 " 快速注释: [count]<leader>cc | [count]<leader>cu
 Plugin 'preservim/nerdcommenter'
-" 快速赋值语句对齐
+" 等号或冒号对齐，用于公式排版
 Plugin 'godlygeek/tabular'
 nmap <Leader>a= :Tabularize /=<CR>
 vmap <Leader>a= :Tabularize /=<CR>
-" :号也对齐
 nmap <Leader>a: :Tabularize /:<CR>
 vmap <Leader>a: :Tabularize /:<CR>
 
 "==========功能相关==========
-" 更高效的移动 [,, + w/fx]
+" 更高效的移动 [<Leader><Leader> + w/f]
 Plugin 'easymotion/vim-easymotion'
 
 " 文件搜索
@@ -84,7 +85,7 @@ nnoremap <Leader>fU :execute 'CtrlPFunky ' . expand('<cword>')<Cr>
 let g:ctrlp_funky_syntax_highlight = 1
 let g:ctrlp_extensions = ['funky']
 
-" A Git wrapper so awesome, it should be illegal
+" A Git wrapper
 Plugin 'tpope/vim-fugitive'
 
 "==========显示增强==========
