@@ -65,12 +65,18 @@ if has('autocmd')
 endif
 
 " 创建持久性撤销记录
-if g:islinux
-	if has('persistent_undo')
-		set undofile
+if has('persistent_undo')
+	set undofile
+    if g:islinux
 		set undodir=/tmp/vimundo/
-		silent call system('mkdir -p ' . &undodir)
+        " :help set
+        "space between '=' and {value} is not allowed.
+    else
+        let &undodir = expand('$HOME/vimfiles/vimundo/')
+        " :help let
+        "'let &{option}' equals to 'set {option}', but more flexible.
 	endif
+	silent call mkdir(&undodir, 'p')
 endif
 
 " remain the content after quit
