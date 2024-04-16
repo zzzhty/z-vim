@@ -7,7 +7,7 @@ set nocompatible              " be iMproved, required
 filetype off                  " required
 
 " set the runtime path to include Vundle and initialize
-if g:islinux
+if g:isunix
     set rtp+=~/.vim/bundle/Vundle.vim
     call vundle#begin('~/.vim/bundle')
 else
@@ -30,13 +30,14 @@ let g:syntastic_check_on_wq = 0
 let g:syntastic_python_checkers = ['flake8']
 " Select alternative linters:
 ":help syntastic-checkers-python
+" Syntastic flag embedded in lightline.vim
 
 "==========Language-format==========
 " Python-format
 Plugin 'psf/black'
 " Editor integration:
 " https://black.readthedocs.io/en/stable/integrations/editors.html
-if g:islinux
+if g:isunix
     let g:black_virtualenv = '~/.vim/black'
 else
     let g:black_virtualenv = '~/vimfiles/black'
@@ -47,7 +48,7 @@ augroup black_on_save
 augroup end
 
 "==========快速编码==========
-" 快速注释: [count]<leader>cc | [count]<leader>cu
+" 快速注释: [count]<Leader>cc | [count]<Leader>cu
 Plugin 'preservim/nerdcommenter'
 " 等号或冒号对齐，用于公式排版
 Plugin 'godlygeek/tabular'
@@ -62,53 +63,55 @@ Plugin 'easymotion/vim-easymotion'
 
 " 文件搜索
 Plugin 'ctrlpvim/ctrlp.vim'
-let g:ctrlp_map = '<leader>p'
+let g:ctrlp_map = '<Leader>p'
 let g:ctrlp_cmd = 'CtrlP'
-map <leader>f :CtrlPMRU<CR>
-" set wildignore+=*/tmp/*,*.so,*.swp,*.zip     " MacOSX/Linux"
+map <Leader>f :CtrlPMRU<CR>
 let g:ctrlp_custom_ignore = {
-			\ 'dir':  '\v[\/]\.(git|hg|svn|rvm)$',
+            \ 'dir':  '\v[\/]\.(git|hg|svn|rvm)$',
 			\ 'file': '\v\.(exe|so|dll|zip|tar|tar.gz)$',
-			\ }
-let g:ctrlp_working_path_mode=0
-let g:ctrlp_match_window_bottom=1
-let g:ctrlp_max_height=15
-let g:ctrlp_match_window_reversed=0
-let g:ctrlp_mruf_max=500
-let g:ctrlp_follow_symlinks=1
+            \ }
+if g:isunix
+    set wildignore+=*/tmp/*,*.so,*.swp,*.zip        " MacOSX/Linux
+else
+    set wildignore+=*\\tmp\\*,*.swp,*.zip,*.exe     " Windows
+endif
+let g:ctrlp_working_path_mode = 0
+let g:ctrlp_match_window = 'bottom,order:ttb,min:1,max:10,results:10'
+let g:ctrlp_mruf_max = 250
+let g:ctrlp_follow_symlinks = 1
 
 " ctrlp插件 - 不用ctag进行函数快速跳转
 Plugin 'tacahiroy/ctrlp-funky'
 nnoremap <Leader>fu :CtrlPFunky<Cr>
 " narrow the list down with a word under cursor
-nnoremap <Leader>fU :execute 'CtrlPFunky ' . expand('<cword>')<Cr>
+nnoremap <Leader>fU :execute 'CtrlPFunky ' .. expand('<cword>')<Cr>
 let g:ctrlp_funky_syntax_highlight = 1
-let g:ctrlp_extensions = ['funky']
 
 " A Git wrapper
 Plugin 'tpope/vim-fugitive'
+" Indicator flag embedded in lightline.vim
 
 "==========显示增强==========
 " 括号显示增强
 Plugin 'kien/rainbow_parentheses.vim'
 let g:rbpt_colorpairs = [
-    \ ['brown',       'RoyalBlue3'],
-    \ ['Darkblue',    'SeaGreen3'],
-    \ ['darkgray',    'DarkOrchid3'],
-    \ ['darkgreen',   'firebrick3'],
-    \ ['darkcyan',    'RoyalBlue3'],
-    \ ['darkred',     'SeaGreen3'],
-    \ ['darkmagenta', 'DarkOrchid3'],
-    \ ['brown',       'firebrick3'],
-    \ ['gray',        'RoyalBlue3'],
-    \ ['black',       'SeaGreen3'],
-    \ ['darkmagenta', 'DarkOrchid3'],
-    \ ['Darkblue',    'firebrick3'],
-    \ ['darkgreen',   'RoyalBlue3'],
-    \ ['darkcyan',    'SeaGreen3'],
-    \ ['darkred',     'DarkOrchid3'],
-    \ ['red',         'firebrick3'],
-    \ ]
+            \ ['brown',       'RoyalBlue3'],
+            \ ['Darkblue',    'SeaGreen3'],
+            \ ['darkgray',    'DarkOrchid3'],
+            \ ['darkgreen',   'firebrick3'],
+            \ ['darkcyan',    'RoyalBlue3'],
+            \ ['darkred',     'SeaGreen3'],
+            \ ['darkmagenta', 'DarkOrchid3'],
+            \ ['brown',       'firebrick3'],
+            \ ['gray',        'RoyalBlue3'],
+            \ ['black',       'SeaGreen3'],
+            \ ['darkmagenta', 'DarkOrchid3'],
+            \ ['Darkblue',    'firebrick3'],
+            \ ['darkgreen',   'RoyalBlue3'],
+            \ ['darkcyan',    'SeaGreen3'],
+            \ ['darkred',     'DarkOrchid3'],
+            \ ['red',         'firebrick3'],
+            \ ]
 let g:rbpt_max = 40
 let g:rbpt_loadcmd_toggle = 0
 au VimEnter * RainbowParenthesesToggle
@@ -121,6 +124,16 @@ Plugin 'itchyny/lightline.vim'
 set laststatus=2
 let g:lightline = {
             \ 'colorscheme': 'wombat',
+            \ }
+let g:lightline.active = {
+            \ 'left': [ [ 'mode', 'paste' ],
+            \           [ 'readonly', 'filename', 'modified' ],
+            \           [ 'syntastic' ],
+            \           [ 'gitbranch' ] ],
+            \ }
+let g:lightline.component = {
+            \ 'syntastic': '%#warningmsg#%{SyntasticStatuslineFlag()}',
+            \ 'gitbranch': '%{FugitiveStatusline()}'
             \ }
 set noshowmode
 

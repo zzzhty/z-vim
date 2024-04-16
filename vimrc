@@ -15,13 +15,13 @@
 " Initial Plugins
 "====================
 " 判断当前操作系统
-let g:iswindows = 0
-let g:islinux = 0
+let g:isdos = 0
+let g:isunix = 0
 if(has("win64") || has("win32") || has("win95") || has("win16"))
-    let g:iswindows = 1
+    let g:isdos = 1
 	set shellslash	" 路径使用左斜杠
 else
-    let g:islinux = 1
+    let g:isunix = 1
 endif
 
 " 修改leader键
@@ -30,7 +30,7 @@ let g:mapleader = ','
 let g:C_Mapleader = '\'
 
 " 加载Vundle插件
-if g:islinux
+if g:isunix
 	if filereadable(expand("~/.vimrc.bundles"))
 		source ~/.vimrc.bundles
 	endif
@@ -67,7 +67,7 @@ endif
 " 创建持久性撤销记录
 if has('persistent_undo')
 	set undofile
-    if g:islinux
+    if g:isunix
 		set undodir=/tmp/vimundo/
         " :help set
         "space between '=' and {value} is not allowed.
@@ -97,16 +97,16 @@ nnoremap <C-p> "*p
 " Display Settings
 "====================
 " 基础设置
-syntax enable	" 语法高亮
-set number		" 显示行号
-set ruler		" 显示标尺
-set autoindent	" 自动缩进
-set smartindent	" 智能缩进
-set nowrap		" 关闭自动折行
-set showcmd		" 显示正在输入指令
-set hlsearch	" 高亮显示搜索结果
-set ignorecase	" 搜索时忽略大小写
-set smartcase	" 智能区分大小写
+syntax enable       " 语法高亮
+set number		    " 显示行号
+set ruler		    " 显示标尺
+set autoindent      " 自动缩进
+set smartindent	    " 智能缩进
+set nowrap		    " 关闭自动折行
+set showcmd		    " 显示正在输入指令
+set hlsearch	    " 高亮显示搜索结果
+set ignorecase	    " 搜索时忽略大小写
+set smartcase	    " 智能区分大小写
 
 " 文本格式
 set expandtab       " 自动将Tab转换为空格
@@ -187,7 +187,7 @@ set termencoding=utf-8
 
 " Use Unix as the standard file type
 set ffs=unix,dos,mac
-if g:islinux
+if g:isunix
 	set ff=unix
 else
 	set ff=dos
@@ -251,26 +251,26 @@ inoremap {<CR> {}<ESC>i<CR><ESC>O
 "====================
 " Others
 "====================
-autocmd! bufwritepost _vimrc source % "vimrc文件修改之后自动加载(windows)
-autocmd! bufwritepost .vimrc source % "vimrc文件修改之后自动加载(linux)
+if g:isunix
+    autocmd! bufwritepost .vimrc source % "vimrc文件修改之后自动加载(linux)
+else
+    autocmd! bufwritepost _vimrc source % "vimrc文件修改之后自动加载(windows)
+endif
 
 " auto-complete configuration
 set completeopt=longest,menu
 
 " 增强模式中的命令行自动完成操作
 set wildmenu
-set wildignore=*.o,*~,*.pyc,*.class
+set wildignore+=*.o,*~,*.pyc,*.class
 
 " 离开插入模式后自动关闭预览窗口
-autocmd InsertLeave * if pumvisible() == 0|pclose|endif
-" 回车即选中当前项
-inoremap <expr> <CR>       pumvisible() ? "\<C-y>" : "\<CR>"
-
-" 上下左右键的行为 会显示其他信息
-inoremap <expr> <Down>     pumvisible() ? "\<C-n>" : "\<Down>"
-inoremap <expr> <Up>       pumvisible() ? "\<C-p>" : "\<Up>"
-inoremap <expr> <PageDown> pumvisible() ? "\<PageDown>\<C-p>\<C-n>" : "\<PageDown>"
-inoremap <expr> <PageUp>   pumvisible() ? "\<PageUp>\<C-p>\<C-n>" : "\<PageUp>"
+autocmd InsertLeave * if pumvisible() == 0 | pclose | endif
+" 若下拉菜单显示，则映射为前值。<C-y>确认并退出；<C-e>取消并退出。
+inoremap <expr> <CR>    pumvisible() ? "\<C-y>" : "\<CR>"
+inoremap <expr> <ESC>   pumvisible() ? "\<C-e>" : "\<ESC>"
+inoremap <expr> <Down>  pumvisible() ? "\<C-n>" : "\<Down>"
+inoremap <expr> <Up>    pumvisible() ? "\<C-p>" : "\<Up>"
 
 
 "End-of-Config
