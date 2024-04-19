@@ -20,7 +20,7 @@ endif
 " let Vundle manage Vundle, required
 Plugin 'VundleVim/Vundle.vim'
 
-"==========基础==========
+"==========语言支持==========
 " 多语言语法检查
 Plugin 'vim-syntastic/syntastic'
 let g:syntastic_always_populate_loc_list = 1
@@ -32,7 +32,6 @@ let g:syntastic_python_checkers = ['flake8']
 ":help syntastic-checkers-python
 " Syntastic flag embedded in lightline.vim
 
-"==========Language-format==========
 " Python-format
 Plugin 'psf/black'
 " Editor integration:
@@ -56,7 +55,7 @@ if g:isunix
     let g:vimtex_view_general_options = '--unique file:@pdf\#src:@line@tex'
 endif
 
-"==========快速编码==========
+"==========自动补全==========
 " 快速注释: [count]<Leader>cc | [count]<Leader>cu
 Plugin 'preservim/nerdcommenter'
 " 等号或冒号对齐，用于公式排版
@@ -69,9 +68,15 @@ vmap <Leader>a: :Tabularize /:<CR>
 " Using UltiSnips to create snippets
 Plugin 'SirVer/ultisnips'
 Plugin 'honza/vim-snippets'
-let g:UltiSnipsExpandTrigger = '<Tab>'
-let g:UltiSnipsJumpForwardTrigger = '<Tab>'
+let g:UltiSnipsExpandOrJumpTrigger = '<Tab>'
 let g:UltiSnipsJumpBackwardTrigger = '<S-Tab>'
+
+" YouCompleteMe
+Plugin 'ycm-core/YouCompleteMe'
+" (absolute-path)/python3 ./install.py --clangd-completer
+let g:ycm_key_list_select_completion = ['<C-n>', '<Down>']
+let g:ycm_key_list_previous_completion = ['<C-p>', '<Up>']
+let g:ycm_key_list_stop_completion = ['<C-y>', '<CR>', '<Esc>']
 
 "==========功能相关==========
 " 更高效的移动 [<Leader><Leader> + w/f]
@@ -103,7 +108,7 @@ nnoremap <Leader>fu :CtrlPFunky<Cr>
 nnoremap <Leader>fU :execute 'CtrlPFunky ' .. expand('<cword>')<Cr>
 let g:ctrlp_funky_syntax_highlight = 1
 
-" A Git wrapper
+" Git wrapper
 Plugin 'tpope/vim-fugitive'
 " Indicator flag embedded in lightline.vim
 
