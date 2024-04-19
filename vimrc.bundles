@@ -53,6 +53,13 @@ let g:vimtex_compiler_method = 'latexmk'
 if g:isunix
     let g:vimtex_view_general_viewer = 'okular'
     let g:vimtex_view_general_options = '--unique file:@pdf\#src:@line@tex'
+else
+    let g:vimtex_view_general_viewer = 'C:\Users\Max\AppData\Local\SumatraPDF\SumatraPDF.exe'
+    let g:vimtex_view_general_options
+                \ = ' -reuse-instance -forward-search @tex @line @pdf'
+                \ .. ' -inverse-search "' .. 'cmd /c start /min \"\" '
+                \ .. '\"' .. exepath(v:progpath) .. '\"'
+                \ .. ' -v --not-a-term -T dumb -c \"VimtexInverseSearch %l ''%f''\"'
 endif
 
 "==========自动补全==========

@@ -19,7 +19,6 @@ let g:isdos = 0
 let g:isunix = 0
 if(has("win64") || has("win32") || has("win95") || has("win16"))
     let g:isdos = 1
-	set shellslash	" 路径使用左斜杠
 else
     let g:isunix = 1
 endif
