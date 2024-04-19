@@ -47,6 +47,15 @@ augroup black_on_save
     autocmd BufWritePre *.py Black
 augroup end
 
+" LaTeX-format
+Plugin 'lervag/vimtex'
+let g:tex_flavor = 'xelatex'
+let g:vimtex_compiler_method = 'latexmk'
+if g:isunix
+    let g:vimtex_view_general_viewer = 'okular'
+    let g:vimtex_view_general_options = '--unique file:@pdf\#src:@line@tex'
+endif
+
 "==========快速编码==========
 " 快速注释: [count]<Leader>cc | [count]<Leader>cu
 Plugin 'preservim/nerdcommenter'
@@ -56,6 +65,13 @@ nmap <Leader>a= :Tabularize /=<CR>
 vmap <Leader>a= :Tabularize /=<CR>
 nmap <Leader>a: :Tabularize /:<CR>
 vmap <Leader>a: :Tabularize /:<CR>
+
+" Using UltiSnips to create snippets
+Plugin 'SirVer/ultisnips'
+Plugin 'honza/vim-snippets'
+let g:UltiSnipsExpandTrigger = '<Tab>'
+let g:UltiSnipsJumpForwardTrigger = '<Tab>'
+let g:UltiSnipsJumpBackwardTrigger = '<S-Tab>'
 
 "==========功能相关==========
 " 更高效的移动 [<Leader><Leader> + w/f]

@@ -24,10 +24,8 @@ else
     let g:isunix = 1
 endif
 
-" 修改leader键
+" 设置Leader键
 let mapleader = ','
-let g:mapleader = ','
-let g:C_Mapleader = '\'
 
 " 加载Vundle插件
 if g:isunix
@@ -238,12 +236,12 @@ nnoremap <silent> # #zz
 nnoremap <silent> g* g*zz
 
 " 选择全部
-nnoremap <leader>sa ggVG"
+nnoremap <Leader>sa ggVG"
 " 选择块
-nnoremap <leader>v V'}
+nnoremap <Leader>v V'}
 
 " 去掉搜索高亮
-noremap <silent> <leader>/ :nohls<CR>
+noremap <silent> <Leader>/ :nohls<CR>
 
 " 大括号自动补全
 inoremap {<CR> {}<ESC>i<CR><ESC>O
