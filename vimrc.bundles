@@ -53,6 +53,8 @@ let g:vimtex_compiler_method = 'latexmk'
 if g:isunix
     let g:vimtex_view_general_viewer = 'okular'
     let g:vimtex_view_general_options = '--unique file:@pdf\#src:@line@tex'
+    " if has('autoservername'), inverse-search can be easily activated.
+    " see help: vimtex-synctex-inverse-search
 else
     let g:vimtex_view_general_viewer = 'C:\Users\Max\AppData\Local\SumatraPDF\SumatraPDF.exe'
     let g:vimtex_view_general_options
