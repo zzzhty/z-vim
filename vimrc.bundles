@@ -48,7 +48,8 @@ augroup end
 
 " LaTeX-format
 Plugin 'lervag/vimtex'
-let g:tex_flavor = 'latex'
+set conceallevel=1
+let g:tex_conceal='abdmg'
 let g:vimtex_compiler_method = 'latexmk'
 if g:isunix
     let g:vimtex_view_general_viewer = 'okular'
