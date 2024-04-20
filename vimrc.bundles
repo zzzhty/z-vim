@@ -60,10 +60,10 @@ else
     "where the pdf file in SumatraPDF is not refreshed after compilation.
     " Reason: latexmk uses xelatex to make an .xdv rather than .pdf file,
     "with the .pdf file being created in a separate step.
-    " This is enforced by the use of the [-no-pdf] option.
+    " default: $xelatex = "xelatex %O %S"
     " If %O is part of the command for invoking xelatex,
-    "then latexmk will insert the -no-pdf option automatically,
-    "otherwise you must provide the option yourself.
+    "then latexmk will insert the [-no-pdf] option automatically,
+    " Solution: expand %O in rc-file and replace [-no-pdf] option. [Not Recommended!]
     let view_exe_path = 'C:\Users\Max\AppData\Local\SumatraPDF\SumatraPDF.exe'
     let g:vimtex_view_general_viewer = view_exe_path
     let g:vimtex_view_general_options
