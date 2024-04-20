@@ -48,7 +48,7 @@ augroup end
 
 " LaTeX-format
 Plugin 'lervag/vimtex'
-let g:tex_flavor = 'xelatex'
+let g:tex_flavor = 'latex'
 let g:vimtex_compiler_method = 'latexmk'
 if g:isunix
     let g:vimtex_view_general_viewer = 'okular'
@@ -56,7 +56,16 @@ if g:isunix
     " if has('autoservername'), inverse-search can be easily activated.
     " see help: vimtex-synctex-inverse-search
 else
-    let g:vimtex_view_general_viewer = 'C:\Users\Max\AppData\Local\SumatraPDF\SumatraPDF.exe'
+    " Note: There is a known issue with VimTeX + SumatraPDF when you use `xelatex`,
+    "where the pdf file in SumatraPDF is not refreshed after compilation.
+    " Reason: latexmk uses xelatex to make an .xdv rather than .pdf file,
+    "with the .pdf file being created in a separate step.
+    " This is enforced by the use of the [-no-pdf] option.
+    " If %O is part of the command for invoking xelatex,
+    "then latexmk will insert the -no-pdf option automatically,
+    "otherwise you must provide the option yourself.
+    let view_exe_path = 'C:\Users\Max\AppData\Local\SumatraPDF\SumatraPDF.exe'
+    let g:vimtex_view_general_viewer = view_exe_path
     let g:vimtex_view_general_options
                 \ = ' -reuse-instance -forward-search @tex @line @pdf'
                 \ .. ' -inverse-search "' .. 'cmd /c start /min \"\" '
