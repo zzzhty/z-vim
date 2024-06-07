@@ -65,7 +65,7 @@ else
     " If %O is part of the command for invoking xelatex,
     "then latexmk will insert the [-no-pdf] option automatically,
     " Solution: expand %O in rc-file and replace [-no-pdf] option. [Not Recommended!]
-    let view_exe_path = 'C:\Users\Max\AppData\Local\SumatraPDF\SumatraPDF.exe'
+    let view_exe_path = 'SumatraPDF.exe'
     let g:vimtex_view_general_viewer = view_exe_path
     let g:vimtex_view_general_options
                 \ = ' -reuse-instance -forward-search @tex @line @pdf'
