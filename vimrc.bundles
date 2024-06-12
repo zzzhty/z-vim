@@ -52,6 +52,7 @@ Plugin 'lervag/vimtex'
 set conceallevel=1
 let g:tex_conceal='abdmg'
 let g:vimtex_compiler_method = 'latexmk'
+let g:vimtex_quickfix_mode = 0
 if g:isunix
     let g:vimtex_view_general_viewer = 'okular'
     let g:vimtex_view_general_options = '--unique file:@pdf\#src:@line@tex'
