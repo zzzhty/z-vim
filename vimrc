@@ -242,9 +242,6 @@ nnoremap <Leader>v V'}
 " 去掉搜索高亮
 noremap <silent> <Leader>/ :noh<CR>
 
-" 大括号自动补全
-inoremap {<CR> {}<ESC>i<CR><ESC>O
-
 "====================
 " Others
 "====================
