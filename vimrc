@@ -99,7 +99,7 @@ set number		    " 显示行号
 set ruler		    " 显示标尺
 set autoindent      " 自动缩进
 set smartindent	    " 智能缩进
-set nowrap		    " 关闭自动折行
+set linebreak		" 智能折行
 set showcmd		    " 显示正在输入指令
 set hlsearch	    " 高亮显示搜索结果
 set ignorecase	    " 搜索时忽略大小写
