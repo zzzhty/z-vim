@@ -23,6 +23,8 @@ Plugin 'VundleVim/Vundle.vim'
 "==========语言支持==========
 " 多语言语法检查
 Plugin 'vim-syntastic/syntastic'
+" Syntastic uses Location-List rather than QuickFix
+" Usage: lop[en], lcl[ose]
 let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_auto_loc_list = 1
 let g:syntastic_loc_list_height = 5
@@ -49,8 +51,10 @@ augroup end
 
 " LaTeX-format
 Plugin 'lervag/vimtex'
-let g:vimtex_compiler_method = 'latexmk'
+" Vimtex uses QuickFix rather than Location-List
+" Usage: cope[n], ccl[ose]
 let g:vimtex_quickfix_mode = 0
+let g:vimtex_compiler_method = 'latexmk'
 if g:isunix
     let g:vimtex_view_general_viewer = 'okular'
     let g:vimtex_view_general_options = '--unique file:@pdf\#src:@line@tex'
