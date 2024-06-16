@@ -52,6 +52,7 @@ augroup end
 " LaTeX-format
 Plugin 'lervag/vimtex'
 " Vimtex uses QuickFix rather than Location-List
+" QuickFix is generated only after :VimtexCompile
 " Usage: cope[n], ccl[ose]
 let g:vimtex_quickfix_mode = 0
 let g:vimtex_compiler_method = 'latexmk'
