@@ -15,13 +15,10 @@
 " Initial Plugins
 "====================
 " 判断当前操作系统
-let g:isdos = 0
-let g:isunix = 0
-if(has("win64") || has("win32") || has("win95") || has("win16"))
-    let g:isdos = 1
-else
-    let g:isunix = 1
-endif
+let g:iswindows = has("win64") || has("win32") || has("win95") || has("win16")
+let g:ismac = has("macunix")
+let g:isdos = g:iswindows
+let g:isunix = !g:iswindows
 
 " 设置Leader键
 let mapleader = ','
@@ -55,40 +52,37 @@ set noswapfile      " 取消交换文件
 set history=2000    " 最大历史记录
 " 打开文件回到之前位置（依据.viminfo）
 if has('autocmd')
-    autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$")
-                \ | exe "normal! g'\""
-                \ | exe "normal! g`\""
-                \ | exe "normal! zz" | endif
+    augroup z_vim_restore_cursor
+        autocmd!
+        autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$")
+                    \ | execute "normal! g'\""
+                    \ | execute "normal! g`\""
+                    \ | execute "normal! zz" | endif
+    augroup END
 endif
 
 " 创建持久性撤销记录
 if has('persistent_undo')
 	set undofile
     if g:isunix
-		set undodir=/tmp/vimundo/
-        " :help set
-        "space between '=' and {value} is not allowed.
+        let &undodir = expand('~/.vim/undo/')
     else
         let &undodir = expand('$HOME/vimfiles/vimundo/')
-        " :help let
-        "'let &{option}' equals to 'set {option}', but more flexible.
-	endif
+    endif
 	silent call mkdir(&undodir, 'p')
 endif
 
-" remain the content after quit
-set t_ti= t_te=
 " remember info about open buffers on close
-set viminfo^=%
-" enabled to paste more than 50 lines
-set viminfo='1000,<1000
+set viminfo='1000,<1000,%
 " turn magic on for regular expressions
 set magic
 
-" 支持在Visual模式下，通过C-y复制到系统剪切板
-vnoremap <C-y> "+y
-" 支持在normal模式下，通过C-p粘贴系统剪切板
-nnoremap <C-p> "*p
+if has('clipboard')
+    " 支持在Visual模式下，通过C-y复制到系统剪切板
+    vnoremap <C-y> "+y
+    " 支持在normal模式下，通过C-p粘贴系统剪切板
+    nnoremap <C-p> "+p
+endif
 
 "====================
 " Display Settings
@@ -111,15 +105,17 @@ set tabstop=4		" 制表符空格数
 set shiftwidth=4	" normal模式下缩进空格数
 set softtabstop=4	" Tab转换的空格数目
 set scrolloff=7		" 自动翻页最小距离
-set textwidth=1000	" 设置最大行宽
+set textwidth=0	    " 禁用自动硬折行
 
 " Relative Line Number
 set relativenumber number
-au FocusLost * :set norelativenumber number
-au FocusGained * :set relativenumber
-" Use Absolute Line Number while typing
-autocmd InsertEnter * :set norelativenumber number
-autocmd InsertLeave * :set relativenumber
+augroup z_vim_number
+    autocmd!
+    autocmd FocusLost * set norelativenumber number
+    autocmd FocusGained * set relativenumber
+    autocmd InsertEnter * set norelativenumber number
+    autocmd InsertLeave * set relativenumber
+augroup END
 function! NumberToggle()
 	if(&relativenumber == 1)
 		set norelativenumber number
@@ -130,7 +126,6 @@ endfunc
 nnoremap <C-n> :call NumberToggle()<CR>
 
 " 高亮配色
-set t_Co=256		" 开启256色
 set cursorline		" 显示光标标线
 set cursorcolumn
 highlight CursorLine cterm=NONE ctermfg=NONE ctermbg=darkgray
@@ -141,8 +136,6 @@ highlight Visual cterm=NONE ctermfg=NONE ctermbg=gray
 
 " 设置标记一列的背景颜色和数字一行颜色一致
 hi! link SignColumn   LineNr
-hi! link ShowMarksHLl DiffAdd
-hi! link ShowMarksHLu DiffChange
 
 " 防止错误整行标红导致看不清
 highlight clear SpellBad
@@ -179,8 +172,6 @@ set fileencoding=utf-8
 " 自动判断编码时，依次尝试以下编码：
 set fileencodings=ucs-bom,utf-8,cp936,gb18030,big5,euc-jp,euc-kr,latin1
 set helplang=cn
-" 下面这句只影响非图形界面下的Vim
-set termencoding=utf-8
 
 " Use Unix as the standard file type
 set ffs=unix,dos,mac
@@ -200,16 +191,29 @@ set formatoptions+=B
 "====================
 " 突出显示超出第80列的所有内容及行末空格
 highlight OverLength cterm=NONE ctermfg=white ctermbg=darkred
-au BufRead,BufNewFile *.py match OverLength /\%>80v.\+\|\s\+$/
+function! s:HighlightPythonOverLength() abort
+    if exists('w:z_vim_overlength_match')
+        silent! call matchdelete(w:z_vim_overlength_match)
+    endif
+    let w:z_vim_overlength_match = matchadd('OverLength', '\%>80v.\+\|\s\+$')
+endfunction
 
 " 文件保存时删除句尾空格
-function! DeleteTrailingWS() abort
-	normal mz
-	%s/\s\+$//ge
-	normal `z
+let s:trailing_ws_excluded_filetypes = ['markdown', 'gitcommit', 'mail', 'diff']
+function! s:DeleteTrailingWS(force) abort
+    if !a:force && index(s:trailing_ws_excluded_filetypes, &filetype) >= 0
+        return
+    endif
+    let l:view = winsaveview()
+    keeppatterns %s/\s\+$//e
+    call winrestview(l:view)
 endfunc
-autocmd BufWrite * :call DeleteTrailingWS()
-nnoremap <Leader><Space> :call DeleteTrailingWS()
+augroup z_vim_filetype
+    autocmd!
+    autocmd FileType python call <SID>HighlightPythonOverLength()
+    autocmd BufWritePre * call <SID>DeleteTrailingWS(0)
+augroup END
+nnoremap <Leader><Space> :call <SID>DeleteTrailingWS(1)<CR>
 
 "====================
 " HotKey Settings
@@ -218,8 +222,8 @@ nnoremap <Leader><Space> :call DeleteTrailingWS()
 nnoremap ; :
 
 " 命令行模式加强
-cnoremap <C-j> <t_kd>
-cnoremap <C-k> <t_ku>
+cnoremap <C-j> <Down>
+cnoremap <C-k> <Up>
 cnoremap <C-a> <Home>
 cnoremap <C-e> <End>
 
@@ -235,9 +239,9 @@ nnoremap <silent> # #zz
 nnoremap <silent> g* g*zz
 
 " 选择全部
-nnoremap <Leader>sa ggVG"
+nnoremap <Leader>sa ggVG
 " 选择块
-nnoremap <Leader>v V'}
+nnoremap <Leader>v V}
 
 " 去掉搜索高亮
 noremap <silent> <Leader>/ :noh<CR>
@@ -246,9 +250,15 @@ noremap <silent> <Leader>/ :noh<CR>
 " Others
 "====================
 if g:isunix
-    autocmd! bufwritepost .vimrc source % "vimrc文件修改之后自动加载(linux)
+    augroup z_vim_reload
+        autocmd!
+        autocmd BufWritePost .vimrc source % "vimrc文件修改之后自动加载(unix)
+    augroup END
 else
-    autocmd! bufwritepost _vimrc source % "vimrc文件修改之后自动加载(windows)
+    augroup z_vim_reload
+        autocmd!
+        autocmd BufWritePost _vimrc source % "vimrc文件修改之后自动加载(windows)
+    augroup END
 endif
 
 " auto-complete configuration
@@ -259,7 +269,10 @@ set wildmenu
 set wildignore+=*.o,*~,*.pyc,*.class
 
 " 离开插入模式后自动关闭预览窗口
-autocmd InsertLeave * if pumvisible() == 0 | pclose | endif
+augroup z_vim_completion
+    autocmd!
+    autocmd InsertLeave * if pumvisible() == 0 | pclose | endif
+augroup END
 " 若下拉菜单显示，则映射为前值。<C-y>确认并退出；<C-e>取消并退出。
 inoremap <expr> <CR>    pumvisible() ? "\<C-y>" : "\<CR>"
 inoremap <expr> <ESC>   pumvisible() ? "\<C-e>" : "\<ESC>"
