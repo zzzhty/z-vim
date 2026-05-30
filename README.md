@@ -1,8 +1,8 @@
 # z-vim
 
 Personal Vim configuration for terminal Vim, with Vundle-managed plugins,
-Python lint/format support, VimTeX, snippets, CtrlP, Fugitive, Lightline, and
-small editing defaults.
+Python lint/format support, snippets, CtrlP, Fugitive, Lightline, and small
+editing defaults.
 
 ## Quick Install
 
@@ -12,15 +12,16 @@ small editing defaults.
 
 The default installer is intended to be one-command for the normal setup. It:
 
-- installs missing required command-line dependencies when a supported package
+- installs missing required `git`/`vim` dependencies when a supported package
   manager is available;
 - backs up existing `~/.vimrc`, `~/.gvimrc`, and `~/.vimrc.bundles` files with
   a timestamp suffix;
 - keeps an existing `~/.vim` plugin directory instead of deleting it;
-- creates `~/.vim/z-vim-tools`;
-- installs or upgrades `flake8` and `black` inside that Python virtualenv;
+- copies `vimrc` and `vimrc.bundles` to `~/.vimrc` and `~/.vimrc.bundles`;
 - installs or updates Vundle;
-- runs `:PluginInstall!` and `:PluginClean!`.
+- runs `:PluginInstall!` and `:PluginClean!`;
+- creates `~/.vim/z-vim-tools` with a Python found in `PATH` or `uv`;
+- installs or upgrades `ruff` inside that Python virtualenv.
 
 Useful modes:
 
@@ -37,34 +38,32 @@ Debian/Ubuntu with `apt-get`, Fedora with `dnf`, and Arch with `pacman`:
 
 - `git`
 - `vim`
-- `python3`
-- Python `venv` support
 
 If automatic installation is not available, install them manually first.
 
 macOS:
 
 ```bash
-brew install git vim python
+brew install git vim
 ```
 
 Debian/Ubuntu:
 
 ```bash
 sudo apt-get update
-sudo apt-get install -y git vim python3 python3-venv python3-pip
+sudo apt-get install -y git vim
 ```
 
 Fedora:
 
 ```bash
-sudo dnf install -y git vim python3 python3-pip
+sudo dnf install -y git vim
 ```
 
 Arch:
 
 ```bash
-sudo pacman -Sy --needed git vim python python-pip
+sudo pacman -Sy --needed git vim
 ```
 
 ## Python Tools
@@ -72,55 +71,35 @@ sudo pacman -Sy --needed git vim python python-pip
 ALE is configured to use:
 
 ```text
-~/.vim/z-vim-tools/bin/flake8
-~/.vim/z-vim-tools/bin/black
+~/.vim/z-vim-tools/bin/ruff
 ```
 
-`./install.sh` creates and updates that environment automatically. To do it
-manually:
+`./install.sh` creates and updates that environment automatically when it can
+find a Python that satisfies `Z_VIM_PYTHON_REQUIREMENT` (default: `3`) and can
+create virtual environments. It searches in this order:
+
+- `python3` then `python` from `PATH`;
+- `uv python find "$Z_VIM_PYTHON_REQUIREMENT"`, if `uv` is installed.
+
+If neither source works, install Python in user space and rerun the installer.
+For example:
+
+```bash
+uv python install 3
+./install.sh
+```
+
+To create the tools environment manually:
 
 ```bash
 python3 -m venv ~/.vim/z-vim-tools
 ~/.vim/z-vim-tools/bin/python -m pip install --upgrade pip
-~/.vim/z-vim-tools/bin/python -m pip install --upgrade flake8 black
+~/.vim/z-vim-tools/bin/python -m pip install --upgrade ruff
 ```
-
-## Optional LaTeX Dependencies
-
-VimTeX is installed by default, but LaTeX compilation needs external tools.
-Install these only if you edit TeX files:
-
-- a TeX distribution with `xelatex`/`pdflatex`;
-- `latexmk`;
-- a PDF viewer.
-
-macOS uses the system `open` command as the PDF viewer. A full no-GUI TeX
-installation can be installed with:
-
-```bash
-brew install --cask mactex-no-gui
-```
-
-For a smaller macOS install, BasicTeX can work, but you may need to add missing
-TeX packages with `tlmgr`:
-
-```bash
-brew install --cask basictex
-```
-
-Linux is configured for `okular`:
-
-```bash
-sudo apt-get install -y latexmk okular
-```
-
-Windows is configured for `SumatraPDF.exe`; install a TeX distribution and
-ensure `latexmk` and `SumatraPDF.exe` are in `PATH`.
 
 ## Installed Plugins
 
 - `dense-analysis/ale`: async linting and formatting
-- `lervag/vimtex`: LaTeX editing
 - `preservim/nerdcommenter`: commenting
 - `godlygeek/tabular`: alignment
 - `SirVer/ultisnips` and `honza/vim-snippets`: snippets

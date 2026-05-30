@@ -24,21 +24,18 @@ Plugin 'VundleVim/Vundle.vim'
 " 异步语法检查和格式化
 Plugin 'dense-analysis/ale'
 let g:ale_linters = {
-            \ 'python': ['flake8'],
+            \ 'python': ['ruff'],
             \ }
 let g:ale_fixers = {
-            \ 'python': ['black'],
+            \ 'python': ['ruff_format'],
             \ }
 let s:z_vim_tools_bin = expand(g:iswindows ? '~/vimfiles/z-vim-tools/Scripts' : '~/.vim/z-vim-tools/bin')
-let s:z_vim_flake8 = s:z_vim_tools_bin . (g:iswindows ? '/flake8.exe' : '/flake8')
-let s:z_vim_black = s:z_vim_tools_bin . (g:iswindows ? '/black.exe' : '/black')
-if executable(s:z_vim_flake8)
-    let g:ale_python_flake8_executable = s:z_vim_flake8
-    let g:ale_python_flake8_use_global = 1
-endif
-if executable(s:z_vim_black)
-    let g:ale_python_black_executable = s:z_vim_black
-    let g:ale_python_black_use_global = 1
+let s:z_vim_ruff = s:z_vim_tools_bin . (g:iswindows ? '/ruff.exe' : '/ruff')
+if executable(s:z_vim_ruff)
+    let g:ale_python_ruff_executable = s:z_vim_ruff
+    let g:ale_python_ruff_use_global = 1
+    let g:ale_python_ruff_format_executable = s:z_vim_ruff
+    let g:ale_python_ruff_format_use_global = 1
 endif
 let g:ale_fix_on_save = 1
 let g:ale_lint_on_enter = 1
@@ -61,39 +58,6 @@ function! ZVimALEStatus() abort
     endif
     return printf('E:%d W:%d', l:errors, l:warnings)
 endfunction
-
-" LaTeX-format
-Plugin 'lervag/vimtex'
-" Vimtex uses QuickFix rather than Location-List
-" QuickFix is generated only after :VimtexCompile
-" Usage: cope[n], ccl[ose]
-let g:vimtex_quickfix_mode = 0
-let g:vimtex_compiler_method = 'latexmk'
-if g:ismac
-    let g:vimtex_view_method = 'general'
-    let g:vimtex_view_general_viewer = 'open'
-elseif g:isunix
-    let g:vimtex_view_general_viewer = 'okular'
-    let g:vimtex_view_general_options = '--unique file:@pdf\#src:@line@tex'
-    " if has('autoservername'), inverse-search can be easily activated.
-    " see help: vimtex-synctex-inverse-search
-else
-    " Note: There is a known issue with VimTeX + SumatraPDF when you use `xelatex`,
-    "where the pdf file in SumatraPDF is not refreshed after compilation.
-    " Reason: latexmk uses xelatex to make an .xdv rather than .pdf file,
-    "with the .pdf file being created in a separate step.
-    " default: $xelatex = "xelatex %O %S"
-    " If %O is part of the command for invoking xelatex,
-    "then latexmk will insert the [-no-pdf] option automatically,
-    " Solution: expand %O in rc-file and replace [-no-pdf] option. [Not Recommended!]
-    let view_exe_path = 'SumatraPDF.exe'
-    let g:vimtex_view_general_viewer = view_exe_path
-    let g:vimtex_view_general_options
-                \ = ' -reuse-instance -forward-search @tex @line @pdf'
-                \ .. ' -inverse-search "' .. 'cmd /c start /min \"\" '
-                \ .. '\"' .. exepath(v:progpath) .. '\"'
-                \ .. ' -v --not-a-term -T dumb -c \"VimtexInverseSearch %l ''%f''\"'
-endif
 
 "==========自动补全==========
 " 快速注释: [count]<Leader>cc | [count]<Leader>cu
