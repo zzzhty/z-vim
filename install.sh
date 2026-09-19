@@ -5,8 +5,7 @@ set -euo pipefail
 CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TARGET_DIR="$HOME/.vim"
 VUNDLE_DIR="$TARGET_DIR/bundle/Vundle.vim"
-TOOLS_VENV="$TARGET_DIR/z-vim-tools"
-PYTHON_REQUIREMENT="${Z_VIM_PYTHON_REQUIREMENT:-3}"
+TOOLS_VENV="$TARGET_DIR/tools"
 INSTALL_DEPS=1
 CHECK_ONLY=0
 
@@ -21,7 +20,7 @@ Options:
 
 By default the installer installs required git/vim dependencies when a
 supported package manager is available, copies Vim config into HOME, installs
-or updates Vim plugins with Vundle, then creates ~/.vim/z-vim-tools with a
+or updates Vim plugins with Vundle, then creates ~/.vim/tools with a
 Python found in PATH or uv and installs ruff there.
 EOF
 }
@@ -37,28 +36,6 @@ fail() {
 
 have() {
     command -v "$1" >/dev/null 2>&1
-}
-
-python_satisfies_requirement() {
-    local python_bin="$1"
-
-    "$python_bin" - "$PYTHON_REQUIREMENT" <<'PY' >/dev/null 2>&1
-import re
-import sys
-
-requirement = sys.argv[1]
-version = sys.version_info
-match = re.fullmatch(r"(\d+)(?:\.(\d+))?", requirement)
-if match is None:
-    raise SystemExit(0 if version.major >= 3 else 1)
-
-required_major = int(match.group(1))
-required_minor = match.group(2)
-if version.major != required_major:
-    raise SystemExit(1)
-if required_minor is not None and version.minor < int(required_minor):
-    raise SystemExit(1)
-PY
 }
 
 python_can_create_venv() {
@@ -92,7 +69,7 @@ find_path_python() {
     for python_cmd in python3 python; do
         if have "$python_cmd"; then
             python_bin="$(command -v "$python_cmd")"
-            if python_satisfies_requirement "$python_bin" && python_can_create_venv "$python_bin"; then
+            if python_can_create_venv "$python_bin"; then
                 printf '%s\n' "$python_bin"
                 return 0
             fi
@@ -105,10 +82,10 @@ find_uv_python() {
     local python_bin
 
     have uv || return 1
-    python_bin="$(uv python find "$PYTHON_REQUIREMENT" 2>/dev/null || true)"
+    python_bin="$(uv python find 3 2>/dev/null || true)"
     [ -n "$python_bin" ] || return 1
     [ -x "$python_bin" ] || return 1
-    if python_satisfies_requirement "$python_bin" && python_can_create_venv "$python_bin"; then
+    if python_can_create_venv "$python_bin"; then
         printf '%s\n' "$python_bin"
         return 0
     fi
@@ -161,9 +138,9 @@ check_dependencies() {
     print_check "git" git || failed=1
     print_check "vim" vim || failed=1
     if python_bin="$(find_python)"; then
-        printf 'ok      Python %s with venv (%s)\n' "$PYTHON_REQUIREMENT" "$(python_display_name "$python_bin")"
+        printf 'ok      Python with venv (%s)\n' "$(python_display_name "$python_bin")"
     else
-        printf 'missing Python %s with working venv support (PATH python3/python or uv)\n' "$PYTHON_REQUIREMENT"
+        printf 'missing Python with working venv support (PATH python3/python or uv)\n'
         failed=1
     fi
     print_check "ruff ($TOOLS_VENV/bin/ruff)" "$TOOLS_VENV/bin/ruff" || failed=1
@@ -249,18 +226,27 @@ install_python_tools() {
         return
     fi
 
-    if [ -e "$TOOLS_VENV" ] && [ ! -x "$TOOLS_VENV/bin/python" ]; then
-        fail "$TOOLS_VENV exists but is not a usable Python virtual environment"
+    if [ -e "$TOOLS_VENV" ] && [ ! -d "$TOOLS_VENV" ]; then
+        fail "$TOOLS_VENV exists but is not a directory"
     fi
 
-    if [ -x "$TOOLS_VENV/bin/python" ] && ! tools_venv_has_pip; then
-        log "Recreating Python tool environment because pip is missing"
-        rm -rf "$TOOLS_VENV"
+    if [ -d "$TOOLS_VENV" ]; then
+        local reason
+        reason=""
+        if [ ! -x "$TOOLS_VENV/bin/python" ]; then
+            reason="its Python is unusable"
+        elif ! tools_venv_has_pip; then
+            reason="pip is missing"
+        fi
+        if [ -n "$reason" ]; then
+            log "Recreating Python tool environment because $reason"
+            rm -rf "$TOOLS_VENV"
+        fi
     fi
 
     if [ ! -x "$TOOLS_VENV/bin/python" ]; then
         if ! python_bin="$(find_python)"; then
-            fail "Python $PYTHON_REQUIREMENT with working venv support was not found in PATH or uv; install Python for your user, for example with: uv python install $PYTHON_REQUIREMENT"
+            fail "Python with working venv support was not found in PATH or uv; install Python for your user, for example with: uv python install 3"
         fi
 
         log "Creating Python tool environment at $TOOLS_VENV with $(python_display_name "$python_bin")"

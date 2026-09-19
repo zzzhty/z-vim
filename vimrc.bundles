@@ -7,15 +7,8 @@ set nocompatible              " be iMproved, required
 filetype off                  " required
 
 " set the runtime path to include Vundle and initialize
-if g:isunix
-    set rtp+=~/.vim/bundle/Vundle.vim
-    call vundle#begin('~/.vim/bundle')
-else
-    set rtp+=~/vimfiles/bundle/Vundle.vim
-    call vundle#begin('~/vimfiles/bundle')
-endif
-" alternatively, pass a path where Vundle should install plugins
-"call vundle#begin('~/some/path/here')
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin('~/.vim/bundle')
 
 " let Vundle manage Vundle, required
 Plugin 'VundleVim/Vundle.vim'
@@ -29,8 +22,7 @@ let g:ale_linters = {
 let g:ale_fixers = {
             \ 'python': ['ruff_format'],
             \ }
-let s:z_vim_tools_bin = expand(g:iswindows ? '~/vimfiles/z-vim-tools/Scripts' : '~/.vim/z-vim-tools/bin')
-let s:z_vim_ruff = s:z_vim_tools_bin . (g:iswindows ? '/ruff.exe' : '/ruff')
+let s:z_vim_ruff = expand('~/.vim/tools/bin/ruff')
 if executable(s:z_vim_ruff)
     let g:ale_python_ruff_executable = s:z_vim_ruff
     let g:ale_python_ruff_use_global = 1
@@ -59,7 +51,7 @@ function! ZVimALEStatus() abort
     return printf('E:%d W:%d', l:errors, l:warnings)
 endfunction
 
-"==========自动补全==========
+"==========编辑增强==========
 " 快速注释: [count]<Leader>cc | [count]<Leader>cu
 Plugin 'preservim/nerdcommenter'
 " 等号或冒号对齐，用于公式排版
@@ -75,7 +67,7 @@ Plugin 'honza/vim-snippets'
 let g:UltiSnipsExpandOrJumpTrigger = '<Tab>'
 let g:UltiSnipsJumpBackwardTrigger = '<S-Tab>'
 
-"==========功能相关==========
+"==========导航与Git==========
 " 更高效的移动 [<Leader><Leader> + w/f]
 Plugin 'easymotion/vim-easymotion'
 
@@ -88,11 +80,7 @@ let g:ctrlp_custom_ignore = {
             \ 'dir':  '\v[\/]\.(git|hg|svn|rvm)$',
 			\ 'file': '\v\.(exe|so|dll|zip|tar|tar.gz)$',
             \ }
-if g:isunix
-    set wildignore+=*/tmp/*,*.so,*.swp,*.zip        " MacOSX/Linux
-else
-    set wildignore+=*\\tmp\\*,*.swp,*.zip,*.exe     " Windows
-endif
+set wildignore+=*/tmp/*,*.so,*.swp,*.zip
 let g:ctrlp_working_path_mode = 0
 let g:ctrlp_match_window = 'bottom,order:ttb,min:1,max:10,results:10'
 let g:ctrlp_mruf_max = 250

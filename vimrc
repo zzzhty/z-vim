@@ -14,24 +14,12 @@
 "====================
 " Initial Plugins
 "====================
-" 判断当前操作系统
-let g:iswindows = has("win64") || has("win32") || has("win95") || has("win16")
-let g:ismac = has("macunix")
-let g:isdos = g:iswindows
-let g:isunix = !g:iswindows
-
 " 设置Leader键
 let mapleader = ','
 
 " 加载Vundle插件
-if g:isunix
-	if filereadable(expand("~/.vimrc.bundles"))
-		source ~/.vimrc.bundles
-	endif
-else
-	if filereadable(expand("~/_vimrc.bundles"))
-		source ~/_vimrc.bundles
-	endif
+if filereadable(expand("~/.vimrc.bundles"))
+	source ~/.vimrc.bundles
 endif
 " 文件类型检测
 filetype plugin indent on
@@ -64,12 +52,8 @@ endif
 " 创建持久性撤销记录
 if has('persistent_undo')
 	set undofile
-    if g:isunix
-        let &undodir = expand('~/.vim/undo/')
-    else
-        let &undodir = expand('$HOME/vimfiles/vimundo/')
-    endif
-	silent call mkdir(&undodir, 'p')
+    let &undodir = expand('~/.vim/undo/')
+    silent call mkdir(&undodir, 'p')
 endif
 
 " remember info about open buffers on close
@@ -175,11 +159,7 @@ set helplang=cn
 
 " Use Unix as the standard file type
 set ffs=unix,dos,mac
-if g:isunix
-	set ff=unix
-else
-	set ff=dos
-endif
+set ff=unix
 
 " 如遇Unicode值大于255的文本，不必等到空格再折行。
 set formatoptions+=m
@@ -249,17 +229,10 @@ noremap <silent> <Leader>/ :noh<CR>
 "====================
 " Others
 "====================
-if g:isunix
-    augroup z_vim_reload
-        autocmd!
-        autocmd BufWritePost .vimrc source % "vimrc文件修改之后自动加载(unix)
-    augroup END
-else
-    augroup z_vim_reload
-        autocmd!
-        autocmd BufWritePost _vimrc source % "vimrc文件修改之后自动加载(windows)
-    augroup END
-endif
+augroup z_vim_reload
+    autocmd!
+    autocmd BufWritePost .vimrc source % "vimrc文件修改之后自动加载
+augroup END
 
 " auto-complete configuration
 set completeopt=longest,menu

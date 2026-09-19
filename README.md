@@ -20,7 +20,7 @@ The default installer is intended to be one-command for the normal setup. It:
 - copies `vimrc` and `vimrc.bundles` to `~/.vimrc` and `~/.vimrc.bundles`;
 - installs or updates Vundle;
 - runs `:PluginInstall!` and `:PluginClean!`;
-- creates `~/.vim/z-vim-tools` with a Python found in `PATH` or `uv`;
+- creates `~/.vim/tools` with a Python found in `PATH` or `uv`;
 - installs or upgrades `ruff` inside that Python virtualenv.
 
 Useful modes:
@@ -71,15 +71,14 @@ sudo pacman -Sy --needed git vim
 ALE is configured to use:
 
 ```text
-~/.vim/z-vim-tools/bin/ruff
+~/.vim/tools/bin/ruff
 ```
 
 `./install.sh` creates and updates that environment automatically when it can
-find a Python that satisfies `Z_VIM_PYTHON_REQUIREMENT` (default: `3`) and can
-create virtual environments. It searches in this order:
+find a Python that can create virtual environments. It searches in this order:
 
 - `python3` then `python` from `PATH`;
-- `uv python find "$Z_VIM_PYTHON_REQUIREMENT"`, if `uv` is installed.
+- `uv python find 3`, if `uv` is installed.
 
 If neither source works, install Python in user space and rerun the installer.
 For example:
@@ -92,23 +91,17 @@ uv python install 3
 To create the tools environment manually:
 
 ```bash
-python3 -m venv ~/.vim/z-vim-tools
-~/.vim/z-vim-tools/bin/python -m pip install --upgrade pip
-~/.vim/z-vim-tools/bin/python -m pip install --upgrade ruff
+python3 -m venv ~/.vim/tools
+~/.vim/tools/bin/python -m pip install --upgrade pip
+~/.vim/tools/bin/python -m pip install --upgrade ruff
 ```
 
 ## Installed Plugins
 
-- `dense-analysis/ale`: async linting and formatting
-- `preservim/nerdcommenter`: commenting
-- `godlygeek/tabular`: alignment
-- `SirVer/ultisnips` and `honza/vim-snippets`: snippets
-- `easymotion/vim-easymotion`: navigation
-- `ctrlpvim/ctrlp.vim` and `tacahiroy/ctrlp-funky`: file/function search
-- `tpope/vim-fugitive`: Git integration
-- `luochen1990/rainbow`: rainbow parentheses
-- `itchyny/lightline.vim`: statusline
-- `preservim/vim-indent-guides`: indent guides
+Plugins are declared and configured in `vimrc.bundles`; see that file (or run
+`:PluginList` inside Vim) for the current set. At a glance it provides async
+linting and formatting, commenting, alignment, snippets, fast cursor movement,
+file and function search, Git integration, and statusline/indent display.
 
 ## Maintenance
 
