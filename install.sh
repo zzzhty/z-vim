@@ -8,6 +8,15 @@ VUNDLE_DIR="$TARGET_DIR/bundle/Vundle.vim"
 TOOLS_VENV="$TARGET_DIR/tools"
 INSTALL_DEPS=1
 CHECK_ONLY=0
+CLEAN_PLUGINS=0
+USER_HOME="$HOME"
+WORK_DIR=""
+ACTIVATING=0
+COMPLETED=0
+LOCKED=0
+TOOLS_PYTHON=""
+BACKED_UP=()
+ACTIVATED=()
 
 usage() {
     cat <<'EOF'
@@ -16,12 +25,14 @@ Usage: ./install.sh [options]
 Options:
   --no-deps    Do not install or update git/vim/ruff.
   --check      Print dependency status and exit.
+  --clean-plugins  Remove undeclared plugins from the staged copy (opt-in).
   -h, --help   Show this help.
 
 By default the installer installs required git/vim dependencies when a
-supported package manager is available, copies Vim config into HOME, installs
-or updates Vim plugins with Vundle, then creates ~/.vim/tools with a
-Python found in PATH or uv and installs ruff there.
+supported package manager is available. Config, plugins and Python tools are
+prepared in isolation before activation. Existing files and symlinks are
+backed up in ~/.z-vim-install.*/backup. Undeclared plugins are kept by default.
+Python tools use a stable private directory linked from ~/.vim/tools.
 EOF
 }
 
@@ -104,6 +115,9 @@ while [ "$#" -gt 0 ]; do
     case "$1" in
         --no-deps)
             INSTALL_DEPS=0
+            ;;
+        --clean-plugins)
+            CLEAN_PLUGINS=1
             ;;
         --check)
             CHECK_ONLY=1
@@ -196,27 +210,73 @@ install_system_dependencies() {
     done
 }
 
-prepare_vim_home() {
-    local today
-
-    log "Backing up current vim config"
-    today="$(date +%Y%m%d%H%M%S)"
-    for i in "$HOME/.vimrc" "$HOME/.gvimrc" "$HOME/.vimrc.bundles"; do
-        if [ -e "$i" ] && [ ! -L "$i" ]; then
-            mv "$i" "$i.$today"
-        fi
-    done
-    for i in "$HOME/.vimrc" "$HOME/.gvimrc" "$HOME/.vimrc.bundles"; do
-        if [ -L "$i" ]; then
-            unlink "$i"
-        fi
-    done
-    if [ -L "$TARGET_DIR" ]; then
-        unlink "$TARGET_DIR"
-    elif [ -e "$TARGET_DIR" ] && [ ! -d "$TARGET_DIR" ]; then
-        mv "$TARGET_DIR" "$TARGET_DIR.$today"
+# All writes before activation are isolated from the user's original config.
+# Keep this directory after success: virtualenv scripts embed its absolute path.
+prepare_stage() {
+    # Resolve uv-managed Python while HOME still points to the user's caches.
+    if [ "$INSTALL_DEPS" -eq 1 ]; then
+        TOOLS_PYTHON="$(find_python)" || fail "Python with working venv support was not found in PATH or uv; install Python first (for example: uv python install 3)"
     fi
-    mkdir -p "$TARGET_DIR"
+    if ! mkdir "$USER_HOME/.z-vim-install.lock" 2>/dev/null; then
+        fail "another install may be running; check $USER_HOME/.z-vim-install.lock before retrying"
+    fi
+    LOCKED=1
+    WORK_DIR="$(mktemp -d "$USER_HOME/.z-vim-install.XXXXXX")"
+    mkdir -p "$WORK_DIR/home/.vim" "$WORK_DIR/backup"
+    if [ -d "$USER_HOME/.vim" ]; then
+        # Dereference links in the copy so plugin updates cannot follow them back
+        # into the original tree. The original links themselves are backed up.
+        cp -RL "$USER_HOME/.vim/." "$WORK_DIR/home/.vim/"
+    fi
+    export HOME="$WORK_DIR/home"
+    export XDG_CACHE_HOME="$HOME/.cache" XDG_CONFIG_HOME="$HOME/.config"
+    export XDG_DATA_HOME="$HOME/.local/share" XDG_STATE_HOME="$HOME/.local/state"
+    mkdir -p "$XDG_CACHE_HOME" "$XDG_CONFIG_HOME" "$XDG_DATA_HOME" "$XDG_STATE_HOME"
+    TARGET_DIR="$HOME/.vim"
+    VUNDLE_DIR="$TARGET_DIR/bundle/Vundle.vim"
+    TOOLS_VENV="$WORK_DIR/tools"
+    local git_file
+    for git_file in "$TARGET_DIR"/bundle/*/.git; do
+        [ ! -f "$git_file" ] || fail "plugin Git worktrees/submodules are not safe to update in a copy: $git_file"
+    done
+}
+
+finish() {
+    local status=$? name rollback_failed=0
+    trap - EXIT HUP INT TERM
+    if [ "$COMPLETED" -eq 0 ] && [ -n "$WORK_DIR" ]; then
+        if [ "$ACTIVATING" -eq 1 ]; then
+            for name in "${ACTIVATED[@]}"; do
+                # Move failed new state aside; never delete the only copy.
+                mv "$USER_HOME/$name" "$WORK_DIR/failed-$name" || rollback_failed=1
+            done
+            for name in "${BACKED_UP[@]}"; do
+                mv "$WORK_DIR/backup/$name" "$USER_HOME/$name" || rollback_failed=1
+            done
+        fi
+        if [ "$rollback_failed" -eq 1 ]; then
+            printf 'Rollback incomplete; recover files from %s/backup\n' "$WORK_DIR" >&2
+        else
+            printf 'Installation failed; original config preserved/restored.\n' >&2
+        fi
+        printf 'Staged files and logs retained at %s\n' "$WORK_DIR" >&2
+        [ "$status" -ne 0 ] || status=1
+    fi
+    if [ "$LOCKED" -eq 1 ]; then rmdir "$USER_HOME/.z-vim-install.lock" || true; fi
+    exit "$status"
+}
+
+activate_config() {
+    local name
+    ACTIVATING=1
+    for name in .vim .vimrc .vimrc.bundles; do
+        if [ -e "$USER_HOME/$name" ] || [ -L "$USER_HOME/$name" ]; then
+            mv "$USER_HOME/$name" "$WORK_DIR/backup/$name"
+            BACKED_UP+=("$name")
+        fi
+        mv "$HOME/$name" "$USER_HOME/$name"
+        ACTIVATED+=("$name")
+    done
 }
 
 install_python_tools() {
@@ -245,9 +305,7 @@ install_python_tools() {
     fi
 
     if [ ! -x "$TOOLS_VENV/bin/python" ]; then
-        if ! python_bin="$(find_python)"; then
-            fail "Python with working venv support was not found in PATH or uv; install Python for your user, for example with: uv python install 3"
-        fi
+        python_bin="$TOOLS_PYTHON"
 
         log "Creating Python tool environment at $TOOLS_VENV with $(python_display_name "$python_bin")"
         if ! "$python_bin" -m venv "$TOOLS_VENV"; then
@@ -258,6 +316,10 @@ install_python_tools() {
     log "Installing Python tools: ruff"
     "$TOOLS_VENV/bin/python" -m pip install --upgrade pip
     "$TOOLS_VENV/bin/python" -m pip install --upgrade ruff
+    "$TOOLS_VENV/bin/ruff" --version
+    # This is only a disposable staged copy, never the original tools directory.
+    rm -rf "$TARGET_DIR/tools"
+    ln -s "$TOOLS_VENV" "$TARGET_DIR/tools"
 }
 
 copy_config() {
@@ -277,13 +339,52 @@ install_vundle() {
 }
 
 install_plugins() {
-    local system_shell
-
-    log "Installing and cleaning Vim plugins"
-    system_shell="${SHELL:-/bin/sh}"
-    export SHELL="/bin/sh"
-    vim -u "$HOME/.vimrc" +PluginInstall! +PluginClean! +qall
-    export SHELL="$system_shell"
+    log "Installing and verifying Vim plugins in staged HOME"
+    cat > "$WORK_DIR/install-plugins.vim" <<'VIM'
+" Configured filename filters must not hide plugin files during installation.
+set wildignore=
+try
+    if empty(get(g:, 'vundle#bundles', []))
+        throw 'No Vundle plugins were registered'
+    endif
+    for bundle in g:vundle#bundles
+        let status = vundle#installer#install(1, bundle.name_spec)
+        if index(['new', 'updated', 'todate', 'pinned'], status) < 0
+            throw 'Plugin installation failed: ' . bundle.name_spec . ' (' . status . ')'
+        endif
+        if !isdirectory(bundle.path()) || empty(glob(bundle.path() . '/*', 1))
+            throw 'Plugin files missing: ' . bundle.name_spec
+        endif
+    endfor
+    if vundle#installer#docs() ==# 'error'
+        throw 'Plugin documentation generation failed'
+    endif
+    if $Z_VIM_CLEAN_PLUGINS ==# '1'
+        call vundle#installer#clean(1)
+        let declared = map(copy(g:vundle#bundles), 'fnamemodify(v:val.path(), ":p")')
+        for candidate in globpath(g:vundle#bundle_dir, '*', 1, 1)
+            if index(declared, fnamemodify(candidate, ':p')) < 0
+                throw 'Plugin cleanup failed: ' . candidate
+            endif
+        endfor
+    endif
+    call writefile(['verified'], $Z_VIM_PLUGIN_MARKER)
+catch
+    echom v:exception
+    call writefile(get(g:, 'vundle#log', []) + [v:exception], $Z_VIM_PLUGIN_LOG)
+    cquit
+endtry
+call writefile(get(g:, 'vundle#log', []), $Z_VIM_PLUGIN_LOG)
+qall!
+VIM
+    # Vundle can report failed clones while Vim itself exits successfully. Check
+    # each installer result and require a marker written only after verification.
+    Z_VIM_PLUGIN_LOG="$WORK_DIR/vundle.log" Z_VIM_CLEAN_PLUGINS="$CLEAN_PLUGINS" Z_VIM_PLUGIN_MARKER="$WORK_DIR/plugins-ok" \
+        SHELL=/bin/sh vim -n -i NONE -es -u "$HOME/.vimrc" \
+        -V1"$WORK_DIR/plugins.log" -S "$WORK_DIR/install-plugins.vim"
+    [ -f "$WORK_DIR/plugins-ok" ] || fail "plugin verification did not finish; see $WORK_DIR/plugins.log"
+    SHELL=/bin/sh vim -n -i NONE -es -u "$HOME/.vimrc" \
+        -V1"$WORK_DIR/startup.log" -c 'qall!'
 }
 
 if [ "$CHECK_ONLY" -eq 1 ]; then
@@ -291,10 +392,17 @@ if [ "$CHECK_ONLY" -eq 1 ]; then
     exit "$?"
 fi
 
+trap finish EXIT
+trap 'exit 129' HUP
+trap 'exit 130' INT
+trap 'exit 143' TERM
 install_system_dependencies
-prepare_vim_home
+prepare_stage
 copy_config
+install_python_tools
 install_vundle
 install_plugins
-install_python_tools
-log "Installation complete"
+activate_config
+COMPLETED=1
+log "Installation complete. Backups and logs: $WORK_DIR"
+log "Keep this directory: ~/.vim/tools may link to its Python environment."
