@@ -238,6 +238,12 @@ prepare_stage() {
     local git_file
     for git_file in "$TARGET_DIR"/bundle/*/.git; do
         [ ! -f "$git_file" ] || fail "plugin Git worktrees/submodules are not safe to update in a copy: $git_file"
+        if [ -d "$git_file" ]; then
+            [ ! -e "$git_file/commondir" ] || fail "plugin shared Git metadata is not safe to update in a copy: $git_file"
+            if git config --file "$git_file/config" --includes --get core.worktree >/dev/null 2>&1; then
+                fail "plugin core.worktree overrides are not safe to update in a copy: $git_file"
+            fi
+        fi
     done
 }
 
@@ -246,11 +252,18 @@ finish() {
     trap - EXIT HUP INT TERM
     if [ "$COMPLETED" -eq 0 ] && [ -n "$WORK_DIR" ]; then
         if [ "$ACTIVATING" -eq 1 ]; then
-            for name in "${ACTIVATED[@]}"; do
+            # Bash 3.2 (macOS) treats an empty array as unset with nounset.
+            for name in ${ACTIVATED[@]+"${ACTIVATED[@]}"}; do
                 # Move failed new state aside; never delete the only copy.
                 mv "$USER_HOME/$name" "$WORK_DIR/failed-$name" || rollback_failed=1
             done
-            for name in "${BACKED_UP[@]}"; do
+            for name in ${BACKED_UP[@]+"${BACKED_UP[@]}"}; do
+                # Never nest an original inside a new directory that could not
+                # be moved aside. Leave the backup at its documented path.
+                if [ -e "$USER_HOME/$name" ] || [ -L "$USER_HOME/$name" ]; then
+                    rollback_failed=1
+                    continue
+                fi
                 mv "$WORK_DIR/backup/$name" "$USER_HOME/$name" || rollback_failed=1
             done
         fi

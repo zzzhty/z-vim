@@ -27,8 +27,8 @@ The default installer is intended to be one-command for the normal setup. It:
 
 The staged copy dereferences existing plugin/config-directory links so updates
 cannot alter their external targets. Originals keep their exact link text in the
-backup. Git worktree/submodule plugins (`.git` files) are rejected rather than
-updating their external Git metadata. A full copy requires enough free disk space
+backup. Git worktree/submodule plugins (`.git` files), shared Git metadata, and
+`core.worktree` overrides are rejected rather than updating external files. A full copy requires enough free disk space
 for your existing `.vim` directory. Concurrent installs are rejected.
 
 Useful modes:
@@ -155,3 +155,7 @@ bash tests/install-test.sh
 These use temporary HOME directories and stub Git/Vim to exercise transaction
 boundaries. They do not prove network availability or compatibility of upstream
 plugins; an actual install also performs its own Vundle and startup checks.
+
+GitHub Actions runs these isolated tests on Linux and macOS, using `/bin/bash`
+(including the macOS system Bash 3.2). Git, Vim, and pip downloads are stubbed;
+system package managers and the runner's real HOME are not modified.

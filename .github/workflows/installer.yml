@@ -1,0 +1,31 @@
+name: Installer regression tests
+
+on:
+  pull_request:
+  push:
+    branches: [main, 'fix/**']
+
+permissions:
+  contents: read
+
+jobs:
+  offline-tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+      - name: Syntax and whitespace
+        run: |
+          /bin/bash -n install.sh tests/install-test.sh
+          git diff --check HEAD^ HEAD
+      - name: Isolated installer tests with system Bash
+        env:
+          TEST_BASH: /bin/bash
+        run: /bin/bash tests/install-test.sh
