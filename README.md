@@ -14,20 +14,29 @@ The default installer is intended to be one-command for the normal setup. It:
 
 - installs missing required `git`/`vim` dependencies when a supported package
   manager is available;
-- backs up existing `~/.vimrc`, `~/.gvimrc`, and `~/.vimrc.bundles` files with
-  a timestamp suffix;
-- keeps an existing `~/.vim` plugin directory instead of deleting it;
-- copies `vimrc` and `vimrc.bundles` to `~/.vimrc` and `~/.vimrc.bundles`;
-- installs or updates Vundle;
-- runs `:PluginInstall!` and `:PluginClean!`;
-- creates `~/.vim/tools` with a Python found in `PATH` or `uv`;
-- installs or upgrades `ruff` inside that Python virtualenv.
+- stages config, a copy of existing plugins, and Python tools in an isolated HOME;
+- verifies each Vundle install/update result and a headless Vim startup before
+  activating the new config;
+- preserves undeclared plugins unless `--clean-plugins` is explicitly supplied;
+- moves original `~/.vim`, `~/.vimrc`, and `~/.vimrc.bundles` (including dangling
+  symlinks) into a unique `~/.z-vim-install.*/backup` directory;
+- leaves `~/.gvimrc` untouched;
+- restores those originals if activation fails;
+- links `~/.vim/tools` to the new Python virtualenv in that stable install directory
+  and installs/upgrades `ruff` there.
+
+The staged copy dereferences existing plugin/config-directory links so updates
+cannot alter their external targets. Originals keep their exact link text in the
+backup. Git worktree/submodule plugins (`.git` files), shared Git metadata, and
+`core.worktree` overrides are rejected rather than updating external files. A full copy requires enough free disk space
+for your existing `.vim` directory. Concurrent installs are rejected.
 
 Useful modes:
 
 ```bash
 ./install.sh --check     # print dependency status
 ./install.sh --no-deps   # only copy Vim config and update Vim plugins
+./install.sh --clean-plugins # opt in to removing undeclared plugins
 ./install.sh --help
 ```
 
@@ -111,9 +120,42 @@ After changing `vimrc.bundles`, run:
 ./install.sh
 ```
 
-or inside Vim:
+or inside Vim (manual plugin updates are not covered by installer rollback):
 
 ```vim
 :PluginInstall!
-:PluginClean!
+:PluginClean  " review removal interactively, only if desired
 ```
+
+### Recovery and verification
+
+Every install prints its unique `~/.z-vim-install.*` directory. Keep successful
+install directories: the active Python tools may link into one of them. Failures
+retain staged files, `plugins.log`, `vundle.log`, and `startup.log` when available.
+The original HOME config is untouched until all staging checks succeed. System
+package-manager changes are not rolled back. Interruptions during activation are
+rolled back where possible; SIGKILL, power loss, or filesystem errors may require
+manual recovery. If the lock remains after such an interruption, first confirm no
+installer is running before removing the empty `~/.z-vim-install.lock` directory.
+
+To restore, close Vim, move the newly installed `.vim`, `.vimrc`, and
+`.vimrc.bundles` aside, and move each original from the chosen install's `backup`
+directory back to its exact HOME path. Missing backup entries mean the path did
+not exist before that installation. Restore symlinks themselves, not their targets;
+relative links resolve correctly again at their original locations. Do not remove
+an install directory while `~/.vim/tools` still points into it. Backups may contain
+private config and history; install directories are created with private permissions.
+
+Run deterministic, offline installer regression tests with:
+
+```bash
+bash tests/install-test.sh
+```
+
+These use temporary HOME directories and stub Git/Vim to exercise transaction
+boundaries. They do not prove network availability or compatibility of upstream
+plugins; an actual install also performs its own Vundle and startup checks.
+
+GitHub Actions runs these isolated tests on Linux and macOS, using `/bin/bash`
+(including the macOS system Bash 3.2). Git, Vim, and pip downloads are stubbed;
+system package managers and the runner's real HOME are not modified.
