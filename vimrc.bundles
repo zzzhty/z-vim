@@ -1,0 +1,146 @@
+" =======================
+" Vundle插件管理及配置列表
+" =======================
+
+"==========初始化==========
+set nocompatible              " be iMproved, required
+filetype off                  " required
+
+" set the runtime path to include Vundle and initialize
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin('~/.vim/bundle')
+
+" let Vundle manage Vundle, required
+Plugin 'VundleVim/Vundle.vim'
+
+"==========语言支持==========
+" 异步语法检查和格式化
+Plugin 'dense-analysis/ale'
+let g:ale_linters = {
+            \ 'python': ['ruff'],
+            \ }
+let g:ale_fixers = {
+            \ 'python': ['ruff_format'],
+            \ }
+let s:z_vim_ruff = expand('~/.vim/tools/bin/ruff')
+if executable(s:z_vim_ruff)
+    let g:ale_python_ruff_executable = s:z_vim_ruff
+    let g:ale_python_ruff_use_global = 1
+    let g:ale_python_ruff_format_executable = s:z_vim_ruff
+    let g:ale_python_ruff_format_use_global = 1
+endif
+let g:ale_fix_on_save = 1
+let g:ale_lint_on_enter = 1
+let g:ale_lint_on_save = 1
+let g:ale_open_list = 1
+let g:ale_list_window_size = 5
+let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
+
+function! ZVimALEStatus() abort
+    try
+        let l:counts = ale#statusline#Count(bufnr(''))
+    catch /^Vim\%((\a\+)\)\=:E117/
+        return ''
+    endtry
+
+    let l:errors = l:counts.error + l:counts.style_error
+    let l:warnings = l:counts.warning + l:counts.style_warning
+    if l:errors == 0 && l:warnings == 0
+        return ''
+    endif
+    return printf('E:%d W:%d', l:errors, l:warnings)
+endfunction
+
+"==========编辑增强==========
+" 快速注释: [count]<Leader>cc | [count]<Leader>cu
+Plugin 'preservim/nerdcommenter'
+" 等号或冒号对齐，用于公式排版
+Plugin 'godlygeek/tabular'
+nmap <Leader>a= :Tabularize /=<CR>
+vmap <Leader>a= :Tabularize /=<CR>
+nmap <Leader>a: :Tabularize /:<CR>
+vmap <Leader>a: :Tabularize /:<CR>
+
+" Using UltiSnips to create snippets
+Plugin 'SirVer/ultisnips'
+Plugin 'honza/vim-snippets'
+let g:UltiSnipsExpandOrJumpTrigger = '<Tab>'
+let g:UltiSnipsJumpBackwardTrigger = '<S-Tab>'
+
+"==========导航与Git==========
+" 更高效的移动 [<Leader><Leader> + w/f]
+Plugin 'easymotion/vim-easymotion'
+
+" 文件搜索
+Plugin 'ctrlpvim/ctrlp.vim'
+let g:ctrlp_map = '<Leader>p'
+let g:ctrlp_cmd = 'CtrlP'
+map <Leader>f :CtrlPMRU<CR>
+let g:ctrlp_custom_ignore = {
+            \ 'dir':  '\v[\/]\.(git|hg|svn|rvm)$',
+			\ 'file': '\v\.(exe|so|dll|zip|tar|tar.gz)$',
+            \ }
+set wildignore+=*/tmp/*,*.so,*.swp,*.zip
+let g:ctrlp_working_path_mode = 0
+let g:ctrlp_match_window = 'bottom,order:ttb,min:1,max:10,results:10'
+let g:ctrlp_mruf_max = 250
+let g:ctrlp_follow_symlinks = 1
+
+" ctrlp插件 - 不用ctag进行函数快速跳转
+Plugin 'tacahiroy/ctrlp-funky'
+nnoremap <Leader>fu :CtrlPFunky<Cr>
+" narrow the list down with a word under cursor
+nnoremap <Leader>fU :execute 'CtrlPFunky ' .. expand('<cword>')<Cr>
+let g:ctrlp_funky_syntax_highlight = 1
+
+" Git wrapper
+Plugin 'tpope/vim-fugitive'
+" Indicator flag embedded in lightline.vim
+
+"==========显示增强==========
+" 括号显示增强
+Plugin 'luochen1990/rainbow'
+let g:rainbow_active = 1
+
+" 状态栏插件
+Plugin 'itchyny/lightline.vim'
+set laststatus=2
+let g:lightline = {
+            \ 'colorscheme': 'wombat',
+            \ }
+let g:lightline.active = {
+            \ 'left': [ [ 'mode', 'paste' ],
+            \           [ 'readonly', 'filename', 'modified' ],
+            \           [ 'ale' ],
+            \           [ 'gitbranch' ] ],
+            \ }
+let g:lightline.component_function = {
+            \ 'ale': 'ZVimALEStatus',
+            \ 'gitbranch': 'FugitiveStatusline',
+            \ }
+set noshowmode
+
+" 增加缩进虚线
+Plugin 'preservim/vim-indent-guides'
+let g:indent_guides_enable_on_vim_startup = 1
+let g:indent_guides_exclude_filetypes = ['help', 'text', 'markdown']
+let g:indent_guides_start_level = 2
+let g:indent_guides_guide_size = 1
+
+"==========完成配置==========
+" All of your Plugins must be added before the following line
+call vundle#end()           " required
+" To ignore plugin indent changes, instead use:
+"filetype plugin on
+"
+" Brief help
+" :PluginList       - lists configured plugins
+" :PluginInstall    - installs plugins; append `!` to update or just :PluginUpdate
+" :PluginSearch foo - searches for foo; append `!` to refresh local cache
+" :PluginClean      - confirms removal of unused plugins; append `!` to auto-approve removal
+"
+" see :h vundle for more details or wiki for FAQ
+" Put your non-Plugin stuff after this line
+
+
+"END
