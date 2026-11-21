@@ -69,9 +69,19 @@ printf '#!%s/earlier-install/tools/bin/python\n' "$HOME" > "$HOME/earlier-instal
 chmod +x "$HOME"/earlier-install/tools/bin/*
 ln -s ../earlier-install/tools "$HOME/.vim/tools"
 EXPECT_ISOLATED_TOOLS=1 run
-test -L "$HOME/.vim/tools"
-test "$(readlink "$HOME/.vim/tools")" = ../earlier-install/tools
-test "$("$HOME/.vim/tools/bin/ruff")" = 'ruff fixture'
+if [ ! -L "$HOME/.vim/tools" ]; then
+    echo 'FAIL --no-deps replaced the tools symlink with a directory' >&2
+    exit 1
+fi
+actual_tools_link="$(readlink "$HOME/.vim/tools")"
+if [ "$actual_tools_link" != ../earlier-install/tools ]; then
+    printf 'FAIL --no-deps changed the tools link: %s\n' "$actual_tools_link" >&2
+    exit 1
+fi
+if [ "$("$HOME/.vim/tools/bin/ruff")" != 'ruff fixture' ]; then
+    echo 'FAIL --no-deps tools entry point did not run' >&2
+    exit 1
+fi
 echo 'PASS --no-deps preserves prior tools symlink and runnable entry point'
 new_home 'first home'
 run --clean-plugins

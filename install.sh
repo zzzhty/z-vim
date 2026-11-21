@@ -286,7 +286,7 @@ preserve_tools_link() {
         # Keep the exact link (including a relative target) for activation.
         # Staged Vim has already exited, so it cannot touch the original tools.
         rm -rf "$TARGET_DIR/tools"
-        cp -P "$original" "$TARGET_DIR/tools"
+        cp -PR "$original" "$TARGET_DIR/tools"
     fi
 }
 
