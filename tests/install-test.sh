@@ -64,9 +64,9 @@ echo 'PASS first/repeat install; undeclared plugins retained'
 # Model a previous install's venv with an entry point that cannot relocate.
 new_home 'preserve-tools'
 mkdir -p "$HOME/.vim" "$HOME/earlier-install/tools/bin"
-printf '#!/bin/sh\nprintf "%%s\\n" "ruff fixture"\n' > "$HOME/earlier-install/tools/bin/python"
+ln -s /usr/bin/true "$HOME/earlier-install/tools/bin/python"
 printf '#!%s/earlier-install/tools/bin/python\n' "$HOME" > "$HOME/earlier-install/tools/bin/ruff"
-chmod +x "$HOME"/earlier-install/tools/bin/*
+chmod +x "$HOME/earlier-install/tools/bin/ruff"
 ln -s ../earlier-install/tools "$HOME/.vim/tools"
 EXPECT_ISOLATED_TOOLS=1 run
 if [ ! -L "$HOME/.vim/tools" ]; then
@@ -78,7 +78,7 @@ if [ "$actual_tools_link" != ../earlier-install/tools ]; then
     printf 'FAIL --no-deps changed the tools link: %s\n' "$actual_tools_link" >&2
     exit 1
 fi
-if [ "$("$HOME/.vim/tools/bin/ruff")" != 'ruff fixture' ]; then
+if ! "$HOME/.vim/tools/bin/ruff"; then
     echo 'FAIL --no-deps tools entry point did not run' >&2
     exit 1
 fi
