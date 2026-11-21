@@ -23,6 +23,9 @@ cat > "$TMP/bin/vim" <<'SH'
 #!/usr/bin/env bash
 set -eu
 # Even a zero exit without verified plugins must be treated as failure.
+if [ "${EXPECT_ISOLATED_TOOLS:-0}" = 1 ]; then
+    [ -d "$HOME/.vim/tools" ] && [ ! -L "$HOME/.vim/tools" ] || exit 1
+fi
 if [ "${FAIL_PLUGIN:-0}" = 1 ]; then exit 0; fi
 if [ "${FAIL_STARTUP:-0}" = 1 ] && [ -z "${Z_VIM_PLUGIN_MARKER:-}" ]; then exit 1; fi
 if [ -n "${Z_VIM_PLUGIN_MARKER:-}" ]; then
@@ -58,6 +61,19 @@ run
 [ "$(cat "$HOME/.vim/bundle/extra/keep")" = precious ]
 [ "$(find "$HOME" -path '*/backup/.vimrc' | wc -l)" -eq 1 ]
 echo 'PASS first/repeat install; undeclared plugins retained'
+# Model a previous install's venv with an entry point that cannot relocate.
+new_home 'preserve-tools'
+mkdir -p "$HOME/.vim" "$HOME/earlier-install/tools/bin"
+printf '#!/bin/sh\nprintf "%%s\\n" "ruff fixture"\n' > "$HOME/earlier-install/tools/bin/python"
+printf '#!%s/earlier-install/tools/bin/python\n' "$HOME" > "$HOME/earlier-install/tools/bin/ruff"
+chmod +x "$HOME"/earlier-install/tools/bin/*
+ln -s ../earlier-install/tools "$HOME/.vim/tools"
+EXPECT_ISOLATED_TOOLS=1 run
+test -L "$HOME/.vim/tools"
+test "$(readlink "$HOME/.vim/tools")" = ../earlier-install/tools
+test "$("$HOME/.vim/tools/bin/ruff")" = 'ruff fixture'
+echo 'PASS --no-deps preserves prior tools symlink and runnable entry point'
+new_home 'first home'
 run --clean-plugins
 [ ! -e "$HOME/.vim/bundle/extra" ]
 find "$HOME" -path '*/backup/.vim/bundle/extra/keep' | grep -q .

@@ -279,6 +279,17 @@ finish() {
     exit "$status"
 }
 
+preserve_tools_link() {
+    local original="$USER_HOME/.vim/tools"
+
+    if [ "$INSTALL_DEPS" -eq 0 ] && [ -L "$original" ]; then
+        # Keep the exact link (including a relative target) for activation.
+        # Staged Vim has already exited, so it cannot touch the original tools.
+        rm -rf "$TARGET_DIR/tools"
+        cp -P "$original" "$TARGET_DIR/tools"
+    fi
+}
+
 activate_config() {
     local name
     ACTIVATING=1
@@ -415,6 +426,7 @@ copy_config
 install_python_tools
 install_vundle
 install_plugins
+preserve_tools_link
 activate_config
 COMPLETED=1
 log "Installation complete. Backups and logs: $WORK_DIR"
