@@ -281,12 +281,18 @@ finish() {
 
 preserve_tools_link() {
     local original="$USER_HOME/.vim/tools"
+    local tools_dir
 
     if [ "$INSTALL_DEPS" -eq 0 ] && [ -L "$original" ]; then
-        # Keep the exact link (including a relative target) for activation.
         # Staged Vim has already exited, so it cannot touch the original tools.
         rm -rf "$TARGET_DIR/tools"
-        cp -PR "$original" "$TARGET_DIR/tools"
+        if [ -L "$USER_HOME/.vim" ] && [[ "$(readlink "$original")" != /* ]]; then
+            # Activation changes the parent of this relative tools link.
+            tools_dir="$(cd -P "$original" && pwd -P)"
+            ln -s "$tools_dir" "$TARGET_DIR/tools"
+        else
+            cp -PR "$original" "$TARGET_DIR/tools"
+        fi
     fi
 }
 

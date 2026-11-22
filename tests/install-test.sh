@@ -83,6 +83,32 @@ if ! "$HOME/.vim/tools/bin/ruff"; then
     exit 1
 fi
 echo 'PASS --no-deps preserves prior tools symlink and runnable entry point'
+
+# The relative tools link is anchored in the external tree until activation.
+new_home relocated-tools
+external="$TMP/external vim"
+mkdir -p "$external/vim" "$external/tools/bin"
+ln -s "$external/vim" "$HOME/.vim"
+ln -s ../tools "$external/vim/tools"
+printf '#!/bin/sh\necho external-ruff\n' > "$external/tools/bin/ruff"
+chmod +x "$external/tools/bin/ruff"
+
+EXPECT_ISOLATED_TOOLS=1 FAIL_ACTIVATION=1 expect_failure
+[ -d "$HOME"/.z-vim-install.*/failed-.vim ]
+[ "$(readlink "$HOME/.vim")" = "$external/vim" ]
+[ "$(readlink "$HOME/.vim/tools")" = ../tools ]
+[ "$("$HOME/.vim/tools/bin/ruff" --version)" = external-ruff ]
+[ ! -e "$HOME/.z-vim-install.lock" ]
+echo 'PASS activation rollback restores nested links and runnable Ruff'
+
+EXPECT_ISOLATED_TOOLS=1 run
+[ ! -L "$HOME/.vim" ]
+[ -L "$HOME/.vim/tools" ]
+[ "$HOME/.vim/tools" -ef "$external/tools" ]
+[ "$("$HOME/.vim/tools/bin/ruff" --version)" = external-ruff ]
+[ "$(readlink "$external/vim/tools")" = ../tools ]
+echo 'PASS activated tools link still reaches external Ruff'
+
 new_home 'first home'
 run --clean-plugins
 [ ! -e "$HOME/.vim/bundle/extra" ]
